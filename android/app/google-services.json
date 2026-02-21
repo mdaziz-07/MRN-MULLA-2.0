@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "1069551294071",
+    "firebase_url": "https://mrn-mulla-2-default-rtdb.firebaseio.com",
+    "project_id": "mrn-mulla-2",
+    "storage_bucket": "mrn-mulla-2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1069551294071:android:209d34144045c185a1d872",
+        "android_client_info": {
+          "package_name": "com.mrnmulla.admin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDIRCtRv6_B7j0WPUjBADEygCAmDMVOvx8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1069551294071:android:c3986c9f75d0eb73a1d872",
+        "android_client_info": {
+          "package_name": "com.mrnmulla.store"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDIRCtRv6_B7j0WPUjBADEygCAmDMVOvx8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

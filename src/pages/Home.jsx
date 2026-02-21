@@ -1,0 +1,547 @@
+import { useState, useEffect, useMemo, useCallback, memo, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
+import {
+    Search, MapPin, ChevronRight, Plus, Minus, X,
+    ShoppingCart, ClipboardList, MessageCircle,
+    Star, ArrowRight, Printer, Scan, Download
+} from 'lucide-react'
+import { useCart } from '../context/CartContext'
+import { PRODUCTS, CATEGORIES } from '../data/products'
+import { STORE_NAME, STORE_LOCATION_TEXT, STORE_PHONE } from '../lib/supabase'
+import ProductModal from '../components/ProductModal'
+import { supabase } from '../lib/supabase'
+import { toast } from 'sonner'
+import { Capacitor } from '@capacitor/core'
+
+/* ─── Product Card (memoized) ─── */
+const ProductCard = memo(function ProductCard({ product, isInCart, qty, onAdd, onIncrement, onDecrement, onOpenModal }) {
+    const discount = product.mrp && product.mrp > product.price
+        ? Math.round(((product.mrp - product.price) / product.mrp) * 100)
+        : 0
+
+    return (
+        <div
+            onClick={() => onOpenModal(product)}
+            className="
+                bg-white rounded-xl p-2
+                shadow-sm border border-gray-100
+                flex flex-col h-full
+                relative group
+                hover:shadow-lg transition-all
+                cursor-pointer
+            "
+        >
+            {/* Image */}
+            <div className="h-36 w-full flex items-center justify-center mb-2 bg-gray-50 rounded-lg p-2">
+                <img
+                    src={product.image_url}
+                    alt={product.name}
+                    className="h-full w-full object-contain mix-blend-multiply"
+                    loading="lazy"
+                    onError={(e) => {
+                        e.target.onerror = null
+                        e.target.src = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23f0f0f0' width='100' height='100' rx='8'/><text x='50' y='55' text-anchor='middle' fill='%23999' font-size='14'>${encodeURIComponent(product.name.charAt(0))}</text></svg>`
+                    }}
+                />
+            </div>
+
+            {/* Product Info - flex-1 pushes price/button to bottom */}
+            <div className="flex-1">
+                <h3 className="text-sm font-bold text-gray-800 line-clamp-2 h-10 mb-1 leading-snug">
+                    {product.name}
+                </h3>
+                <p className="text-xs text-gray-500 mb-2">
+                    {product.pack_size} {product.unit}
+                </p>
+            </div>
+
+            {/* Price & Action */}
+            <div onClick={(e) => e.stopPropagation()}>
+                <div className="text-base font-bold text-black mb-2">
+                    ₹{product.price}
+                    {product.mrp && product.mrp > product.price && (
+                        <span className="text-xs text-[#BDBDBD] line-through ml-1">₹{product.mrp}</span>
+                    )}
+                </div>
+
+                {!isInCart ? (
+                    <button
+                        onClick={() => onAdd(product)}
+                        className="
+                            w-full bg-[#023430] text-white
+                            py-1.5 rounded-lg
+                            font-bold
+                            hover:bg-[#024a3b] transition-colors
+                            flex items-center justify-center
+                            active:scale-95 transition-transform
+                        "
+                        aria-label={`Add ${product.name} to cart`}
+                    >
+                        <Plus size={16} />
+                    </button>
+                ) : (
+                    <div className="flex items-center justify-between bg-white border border-[#023430] rounded-lg h-7 px-1">
+                        <button
+                            onClick={() => onDecrement(product.id)}
+                            className="text-[#023430]"
+                            aria-label="Decrease quantity"
+                        >
+                            <Minus size={14} />
+                        </button>
+                        <span className="text-xs font-bold text-[#023430]">
+                            {qty}
+                        </span>
+                        <button
+                            onClick={() => onIncrement(product.id)}
+                            className="text-[#023430]"
+                            aria-label="Increase quantity"
+                        >
+                            <Plus size={14} />
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            {/* Discount Badge - bottom left */}
+            {discount > 0 && (
+                <div className="
+                    absolute top-2 left-2
+                    px-2 py-0.5 rounded-md
+                    bg-red-500 text-white
+                    text-[10px] font-bold
+                    pointer-events-none
+                    shadow-sm
+                ">
+                    {discount}% OFF
+                </div>
+            )}
+        </div>
+    )
+})
+
+/* ─── Home Page ─── */
+export default function Home() {
+    const navigate = useNavigate()
+    const { items, addToCart, incrementQty, decrementQty, isInCart, getQty, totalItems, totalAmount } = useCart()
+
+    const [selectedCategory, setSelectedCategory] = useState('All')
+    const [searchQuery, setSearchQuery] = useState('')
+    const [selectedProduct, setSelectedProduct] = useState(null)
+    const [scrolled, setScrolled] = useState(false)
+    const scrolledRef = useRef(false)
+    const [shopOpen, setShopOpen] = useState(true)
+    const [products, setProducts] = useState(PRODUCTS)
+    const [showAppPrompt, setShowAppPrompt] = useState(false)
+
+    // Check if running on web and hasn't dismissed the prompt
+    useEffect(() => {
+        const isWeb = Capacitor.getPlatform() === 'web'
+        const hasDismissed = localStorage.getItem('hideAppPrompt') === 'true'
+
+        if (isWeb && !hasDismissed) {
+            // Slight delay to not hit them instantly on paint
+            const timer = setTimeout(() => setShowAppPrompt(true), 1500)
+            return () => clearTimeout(timer)
+        }
+    }, [])
+
+    const handleDismissPrompt = () => {
+        setShowAppPrompt(false)
+        localStorage.setItem('hideAppPrompt', 'true')
+    }
+
+    // Read shop status
+    // Shop status & Product fetching
+    useEffect(() => {
+        // 1. Fetch Shop Status from Supabase
+        const fetchShopStatus = async () => {
+            const { data } = await supabase
+                .from('store_settings')
+                .select('value')
+                .eq('key', 'shop_open')
+                .single()
+
+            if (data) {
+                setShopOpen(data.value === 'true')
+            }
+        }
+        fetchShopStatus()
+
+        // 2. Subscribe to Shop Status changes
+        // 2. Subscribe to Shop Status changes
+        const statusSubscription = supabase
+            .channel('home_shop_status')
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'store_settings'
+            }, (payload) => {
+                console.log('🔔 STORE SETTINGS UPDATE:', payload)
+                if (payload.new && payload.new.key === 'shop_open') {
+                    setShopOpen(payload.new.value === 'true')
+                }
+            })
+            .subscribe((status) => {
+                console.log('🔌 Store Status Subscription:', status)
+            })
+
+        return () => {
+            supabase.removeChannel(statusSubscription)
+        }
+    }, [])
+
+    // Fetch products from Supabase
+    useEffect(() => {
+        const fetchProducts = async () => {
+            const { data, error } = await supabase
+                .from('products')
+                .select('*')
+                .order('id', { ascending: true })
+
+            if (data && !error) {
+                setProducts(data)
+            }
+        }
+
+        fetchProducts()
+
+        // Real-time subscription for instant updates
+        const subscription = supabase
+            .channel('public:products')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, (payload) => {
+                console.log('📦 PRODUCT UPDATE:', payload)
+                if (payload.eventType === 'INSERT') {
+                    setProducts(prev => [...prev, payload.new])
+                } else if (payload.eventType === 'UPDATE') {
+                    setProducts(prev => prev.map(p => p.id === payload.new.id ? payload.new : p))
+                } else if (payload.eventType === 'DELETE') {
+                    setProducts(prev => prev.filter(p => p.id !== payload.old.id))
+                }
+            })
+            .subscribe((status) => {
+                console.log('🔌 Product Subscription:', status)
+            })
+
+        return () => {
+            supabase.removeChannel(subscription)
+        }
+    }, [])
+
+    // Single optimised scroll listener — uses ref to avoid double re-render
+    useEffect(() => {
+        const handleScroll = () => {
+            const isNowScrolled = window.scrollY > 60
+            if (isNowScrolled !== scrolledRef.current) {
+                scrolledRef.current = isNowScrolled
+                setScrolled(isNowScrolled)
+            }
+        }
+        window.addEventListener('scroll', handleScroll, { passive: true })
+        return () => window.removeEventListener('scroll', handleScroll)
+    }, [])
+
+    // Categories with counts
+    const categoriesWithCounts = useMemo(() => {
+        const counts = {}
+        products.forEach(p => {
+            counts[p.category] = (counts[p.category] || 0) + 1
+        })
+        return CATEGORIES.map(c =>
+            c.name === 'All'
+                ? { ...c, count: products.length }
+                : { ...c, count: counts[c.name] || 0 }
+        )
+    }, [products])
+
+    // Filtered products
+    const filteredProducts = useMemo(() => {
+        let result = products
+        if (selectedCategory !== 'All') {
+            result = result.filter(p => p.category === selectedCategory)
+        }
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase().replace(/\s+/g, '')
+            result = result.filter(p =>
+                p.name.toLowerCase().replace(/\s+/g, '').includes(q) ||
+                p.category.toLowerCase().replace(/\s+/g, '').includes(q)
+            )
+        }
+        return result
+    }, [products, selectedCategory, searchQuery])
+
+    const openProductModal = useCallback((product) => {
+        setSelectedProduct(product)
+    }, [])
+
+    // Global toast dedup: dismiss any active toast before showing a new one
+    const activeToastId = useRef(null)
+    const showToast = useCallback((type, message, options = {}) => {
+        if (activeToastId.current) toast.dismiss(activeToastId.current)
+        activeToastId.current = toast[type](message, options)
+        return activeToastId.current
+    }, [])
+
+    const handleAddToCart = useCallback((product) => {
+        if (!shopOpen) {
+            showToast('error', '🔴 Shop is currently CLOSED')
+            return
+        }
+        addToCart(product)
+    }, [shopOpen, addToCart, showToast])
+
+    return (
+        <div className="min-h-screen bg-gray-50 pb-32">
+
+            {/* ─── HEADER ─── */}
+            <div className="bg-[#023430] text-white pt-[calc(env(safe-area-inset-top)+1.2rem)] pb-3 px-5 relative z-10">
+                <div className="flex justify-between items-start mb-3">
+                    <div>
+                        <h1 className="text-xl font-black tracking-wide uppercase">
+                            {STORE_NAME}
+                        </h1>
+                        <div className="flex items-center gap-2 mt-1 opacity-90">
+                            <MapPin size={12} />
+                            <p className="text-xs font-medium">{STORE_LOCATION_TEXT}</p>
+                        </div>
+                        <div className="flex gap-2 mt-3">
+                            <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border backdrop-blur-sm ${shopOpen ? 'bg-green-400/20 text-green-100 border-green-400/30' : 'bg-red-400/20 text-red-100 border-red-400/30'}`}>
+                                {shopOpen ? 'OPEN NOW' : 'CLOSED'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => navigate('/print')}
+                            className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-md border border-white/10 hover:bg-white/20 transition-colors"
+                            aria-label="Print"
+                        >
+                            <Printer size={20} />
+                        </button>
+                        <button
+                            onClick={() => navigate('/orders')}
+                            className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-md border border-white/10 hover:bg-white/20 transition-colors"
+                            aria-label="My Orders"
+                        >
+                            <ClipboardList size={20} />
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* ─── SEARCH BAR — sticky with safe-area header protector ─── */}
+            <div className={`sticky top-0 z-50 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.5rem)] bg-[#023430] rounded-b-2xl ${scrolled ? 'shadow-lg' : 'shadow-md'}`}>
+                <div className="relative">
+                    <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                        type="text"
+                        placeholder="Search products..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full bg-white text-gray-800 rounded-full pl-10 pr-9 py-2.5 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#E0A75E] shadow-sm"
+                    />
+                    {searchQuery && (
+                        <button
+                            onClick={() => setSearchQuery('')}
+                            className="absolute right-3 top-1/2 -translate-y-1/2"
+                        >
+                            <X size={15} className="text-gray-400" />
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            {/* ─── CATEGORY PILLS ─── */}
+            <div className="
+                flex overflow-x-auto px-5 py-6 gap-5
+                scrollbar-hide mb-2 snap-x
+            ">
+                {categoriesWithCounts.map((cat) => (
+                    <button
+                        key={cat.name}
+                        onClick={() => setSelectedCategory(cat.name)}
+                        className="flex flex-col items-center min-w-[76px] cursor-pointer group snap-start"
+                    >
+                        <div className={`
+                            w-16 h-16 md:w-24 md:h-24
+                            rounded-full flex items-center justify-center
+                            mb-2.5 transition-all duration-300 overflow-hidden
+                            ${selectedCategory === cat.name
+                                ? 'bg-green-50 border-2 border-green-600 shadow-md scale-105'
+                                : 'bg-white border border-gray-100 shadow-sm group-hover:shadow-md'
+                            }
+                        `}>
+                            {cat.image ? (
+                                <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" />
+                            ) : (
+                                <span className="text-2xl md:text-3xl">{cat.icon}</span>
+                            )}
+                        </div>
+                        <span className={`
+                            text-[11px] font-bold text-center leading-tight max-w-[80px]
+                            ${selectedCategory === cat.name ? 'text-green-800' : 'text-gray-500'}
+                        `}>
+                            {cat.name}
+                        </span>
+                    </button>
+                ))}
+            </div>
+
+            {/* ─── PRODUCT GRID ─── */}
+            <main className="px-3 pb-6">
+                {/* Section Title */}
+                {selectedCategory !== 'All' && (
+                    <div className="flex items-center justify-between mb-3 px-1">
+                        <h2 className="text-lg font-bold text-[#1A1A1A]">
+                            {selectedCategory}
+                        </h2>
+                        <span className="text-[12px] text-[#757575] font-medium">
+                            {filteredProducts.length} products
+                        </span>
+                    </div>
+                )}
+
+                {searchQuery && (
+                    <div className="mb-3 px-1">
+                        <p className="text-sm text-[#757575]">
+                            Showing results for &ldquo;<span className="font-semibold text-[#1A1A1A]">{searchQuery}</span>&rdquo;
+                            <span className="ml-2 text-[#BDBDBD]">({filteredProducts.length})</span>
+                        </p>
+                    </div>
+                )}
+
+                {filteredProducts.length > 0 ? (
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
+                        {filteredProducts.map(product => (
+                            <ProductCard
+                                key={product.id}
+                                product={product}
+                                isInCart={isInCart(product.id)}
+                                qty={getQty(product.id)}
+                                onAdd={handleAddToCart}
+                                onIncrement={incrementQty}
+                                onDecrement={decrementQty}
+                                onOpenModal={openProductModal}
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-16">
+                        <div className="text-5xl mb-4">🔍</div>
+                        <p className="text-lg font-semibold text-[#1A1A1A] mb-1">No products found</p>
+                        <p className="text-sm text-[#757575]">Try a different search or category</p>
+                    </div>
+                )}
+            </main>
+
+            {/* ─── WHATSAPP BUTTON ─── */}
+            {!selectedProduct && (
+                <div className="fixed bottom-24 right-4 z-50 flex flex-col gap-3 items-end">
+                    {/* WhatsApp Button */}
+                    <a
+                        href={`https://wa.me/91${STORE_PHONE}?text=Hello! I need help with...`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-[#25D366] text-white p-3.5 rounded-full shadow-2xl hover:scale-110 transition-transform flex items-center justify-center hover:shadow-green-500/30"
+                    >
+                        <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+                        </svg>
+                    </a>
+                </div>
+            )}
+
+            {/* ─── FLOATING CART BUTTON ─── */}
+            {totalItems > 0 && !selectedProduct && (
+                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-auto">
+                    <div
+                        onClick={() => navigate('/checkout')}
+                        className="
+                            bg-black/90 backdrop-blur-md text-white
+                            px-4 py-2.5 rounded-full
+                            shadow-2xl
+                            flex items-center justify-center gap-3
+                            cursor-pointer
+                            hover:scale-105 transition-all active:scale-95
+                            border border-white/10
+                            animate-slideUp
+                        "
+                    >
+                        <div className="bg-white/20 p-1.5 rounded-full">
+                            <ShoppingCart size={18} className="text-green-300" />
+                        </div>
+                        <span className="font-bold text-sm tracking-wide">
+                            {totalItems} Items | ₹{totalAmount}
+                        </span>
+                        <ChevronRight size={16} className="text-gray-400" />
+                    </div>
+                </div>
+            )}
+
+            {/* ─── PRODUCT DETAIL MODAL ─── */}
+            {selectedProduct && (
+                <ProductModal
+                    product={selectedProduct}
+                    onClose={() => setSelectedProduct(null)}
+                    isInCart={isInCart(selectedProduct.id)}
+                    qty={getQty(selectedProduct.id)}
+                    onAdd={handleAddToCart}
+                    onIncrement={incrementQty}
+                    onDecrement={decrementQty}
+                />
+            )}
+
+            {/* ─── APP DOWNLOAD PROMPT (Web Only) ─── */}
+            {showAppPrompt && (
+                <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+                    <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl animate-scaleIn relative">
+                        {/* Close button top right */}
+                        <button
+                            onClick={handleDismissPrompt}
+                            className="absolute top-4 right-4 bg-gray-100 p-1.5 rounded-full text-gray-500 hover:bg-gray-200 transition-colors z-10"
+                        >
+                            <X size={18} />
+                        </button>
+
+                        {/* Header Image Area */}
+                        <div className="bg-[#023430] py-8 flex flex-col items-center justify-center relative overflow-hidden">
+                            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent"></div>
+                            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg mb-3 relative z-10">
+                                <span className="text-2xl font-black text-[#023430]">M</span>
+                            </div>
+                            <h3 className="text-white font-bold text-lg relative z-10">MRN Mulla Kirana</h3>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-6 text-center space-y-4">
+                            <h4 className="font-extrabold text-[#1A1A1A] text-xl">
+                                For the Best Experience!
+                            </h4>
+                            <p className="text-sm text-[#757575] leading-relaxed">
+                                Get our Free Android App for faster ordering, real-time tracking, and exclusive offers.
+                            </p>
+
+                            <div className="pt-2 space-y-3">
+                                <a
+                                    href="https://www.dropbox.com/scl/fi/f8vpxoz12jfztn6brf8zz/MRN-Mulla-Kirana.apk?rlkey=xut6avgeej9zh9rvxs5opuqfn&st=2aplj0te&dl=1"
+                                    onClick={() => handleDismissPrompt()} // Hide prompt after clicking
+                                    className="w-full flex items-center justify-center gap-2 bg-[#023430] text-white py-3.5 rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg hover:shadow-[#023430]/30"
+                                >
+                                    <Download size={20} />
+                                    Download App
+                                </a>
+                                <button
+                                    onClick={handleDismissPrompt}
+                                    className="w-full py-3 rounded-xl font-bold text-[#757575] hover:bg-gray-50 transition-colors"
+                                >
+                                    Continue on Mobile Web
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+        </div>
+    )
+}
