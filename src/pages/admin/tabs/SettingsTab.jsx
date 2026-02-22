@@ -9,7 +9,8 @@ export default function SettingsTab() {
         delivery_charge: '0',
         delivery_min_amount: '0',
         bw_price: '3',
-        color_price: '10'
+        color_price: '10',
+        latest_app_version: '1' // New setting for mandatory updates
     })
     const [savedSettings, setSavedSettings] = useState(null) // track original values
 
@@ -22,7 +23,7 @@ export default function SettingsTab() {
         const { data } = await supabase
             .from('store_settings')
             .select('key, value')
-            .in('key', ['delivery_charge', 'delivery_min_amount', 'bw_price', 'color_price'])
+            .in('key', ['delivery_charge', 'delivery_min_amount', 'bw_price', 'color_price', 'latest_app_version'])
 
         if (data) {
             const newSettings = { ...settings }
@@ -123,6 +124,37 @@ export default function SettingsTab() {
                 </div>
             </div>
 
+            {/* App Settings */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center">
+                        <Save className="text-green-600" size={20} />
+                    </div>
+                    <div>
+                        <h2 className="text-lg font-bold text-gray-900">App Version Control</h2>
+                        <p className="text-sm text-gray-500">Force customers to update their app</p>
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Latest Customer App Version
+                        </label>
+                        <input
+                            type="number"
+                            value={settings.latest_app_version}
+                            onChange={(e) => handleChange('latest_app_version', e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#023430] focus:border-transparent transition-all outline-none font-semibold"
+                            placeholder="1"
+                        />
+                        <p className="text-xs text-red-500 mt-1">
+                            ⚠️ If a customer's app version is lower than this number, they will be blocked from using the app and forced to download the new APK. Increment this when you release a new app update.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             {/* Print Pricing Settings */}
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                 <div className="flex items-center gap-3 mb-6">
@@ -175,8 +207,8 @@ export default function SettingsTab() {
                 onClick={handleSave}
                 disabled={loading || !hasChanges}
                 className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold transition-all ${hasChanges
-                        ? 'bg-[#023430] text-white hover:bg-[#034540] active:scale-95'
-                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    ? 'bg-[#023430] text-white hover:bg-[#034540] active:scale-95'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     } disabled:opacity-50`}
             >
                 {loading ? (

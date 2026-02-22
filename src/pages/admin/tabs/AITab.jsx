@@ -3,6 +3,7 @@ import { Mic, MicOff, Volume2, Send, Sparkles } from 'lucide-react'
 import { supabase } from '../../../lib/supabase'
 import { toast } from 'sonner'
 import { SpeechRecognition } from '@capacitor-community/speech-recognition'
+import { TextToSpeech } from '@capacitor-community/text-to-speech'
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyCGb0717T0mo_1C2ou1i108q88jVPfBMkU`
@@ -22,6 +23,7 @@ export default function AITab() {
     const [response, setResponse] = useState('')
     const [isProcessing, setIsProcessing] = useState(false)
     const [textInput, setTextInput] = useState('')
+    const transcriptRef = useRef('')
 
     useEffect(() => {
         // Request permissions on mount
@@ -103,6 +105,30 @@ IMPORTANT RULES:
         }
     }
 
+    const speakText = async (text) => {
+        const cleanText = text.replace(/[✅📦📊⚠️🤖❌🔍💰•\n\*\_]/g, ' ').replace(/\s+/g, ' ').trim()
+        try {
+            await TextToSpeech.speak({
+                text: cleanText,
+                lang: 'en-IN',
+                rate: 0.9,
+                pitch: 1.0,
+                volume: 1.0,
+                category: 'ambient',
+            })
+        } catch (err) {
+            console.error('TTS Error:', err)
+            // Fallback to Web Speech
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel()
+                const utterance = new SpeechSynthesisUtterance(cleanText)
+                utterance.lang = 'en-IN'
+                utterance.rate = 0.9
+                window.speechSynthesis.speak(utterance)
+            }
+        }
+    }
+
     // ─── Process command using Gemini AI ───
     const processCommand = useCallback(async (command) => {
         setIsProcessing(true)
@@ -112,12 +138,12 @@ IMPORTANT RULES:
             // 1. Fetch all product names from Supabase
             const { data: products, error: prodErr } = await supabase
                 .from('products')
-                .select('name, price, stock')
+                .select('name, price, stock, category, pack_size, unit')
                 .order('name')
 
             if (prodErr) throw prodErr
 
-            const productList = products?.map(p => `- ${p.name} (₹${p.price}, Stock: ${p.stock || 0})`).join('\n') || 'No products found'
+            const productList = products?.map(p => `- ${p.name} (${p.pack_size} ${p.unit}) [${p.category}] - Price: ₹${p.price}, Stock: ${p.stock || 0}`).join('\n') || 'No products found'
 
             // 2. Send command + products to Gemini
             const action = await callGemini(command, productList)
@@ -259,15 +285,7 @@ IMPORTANT RULES:
         setResponse(reply)
         setIsProcessing(false)
 
-        // Text-to-speech
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel()
-            const cleanText = reply.replace(/[✅📦📊⚠️🤖❌🔍💰•\n]/g, ' ').replace(/\s+/g, ' ').trim()
-            const utterance = new SpeechSynthesisUtterance(cleanText)
-            utterance.lang = 'en-IN'
-            utterance.rate = 0.9
-            window.speechSynthesis.speak(utterance)
-        }
+        speakText(reply)
     }, [])
 
     // ─── Start Listening using native speech recognition ───
@@ -292,12 +310,14 @@ IMPORTANT RULES:
 
             setIsListening(true)
             setTranscript('')
+            transcriptRef.current = ''
             setResponse('')
 
             // Listen for partial results
             SpeechRecognition.addListener('partialResults', (data) => {
                 if (data.matches && data.matches.length > 0) {
                     setTranscript(data.matches[0])
+                    transcriptRef.current = data.matches[0]
                 }
             })
 
@@ -309,13 +329,15 @@ IMPORTANT RULES:
             })
 
             // The plugin auto-stops after silence. Listen for the result
-            // We need to poll or wait for the final result
-            // Use a timeout to check final results
             const checkResult = async () => {
                 try {
                     const { status } = await SpeechRecognition.isListening()
                     if (!status) {
                         setIsListening(false)
+                        if (transcriptRef.current && transcriptRef.current.trim()) {
+                            processCommand(transcriptRef.current)
+                            transcriptRef.current = '' // Prevent double processing
+                        }
                         return
                     }
                     setTimeout(checkResult, 1000)
@@ -323,7 +345,7 @@ IMPORTANT RULES:
                     setIsListening(false)
                 }
             }
-            setTimeout(checkResult, 5000)
+            setTimeout(checkResult, 3000)
 
         } catch (err) {
             console.error('Speech recognition error:', err)
@@ -391,17 +413,12 @@ IMPORTANT RULES:
             await SpeechRecognition.stop()
         } catch { }
 
-        // Process the transcript we have
-        const currentTranscript = transcript
-        // Small delay to capture final transcript update
-        setTimeout(() => {
-            // Use the latest transcript from the DOM
-            const transcriptEl = document.querySelector('[data-transcript]')
-            const finalText = transcriptEl?.textContent?.replace(/^"|"$/g, '') || currentTranscript
-            if (finalText && finalText.trim()) {
-                processCommand(finalText)
-            }
-        }, 300)
+        if (transcriptRef.current && transcriptRef.current.trim()) {
+            processCommand(transcriptRef.current)
+            transcriptRef.current = ''
+        } else if (transcript && transcript.trim()) {
+            processCommand(transcript)
+        }
     }, [transcript, processCommand])
 
     const handleTextCommand = () => {
@@ -418,14 +435,7 @@ IMPORTANT RULES:
     }
 
     const speakResponse = (text) => {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel()
-            const cleanText = text.replace(/[✅📦📊⚠️🤖❌🔍💰•\n]/g, ' ').replace(/\s+/g, ' ').trim()
-            const utterance = new SpeechSynthesisUtterance(cleanText)
-            utterance.lang = 'en-IN'
-            utterance.rate = 0.9
-            window.speechSynthesis.speak(utterance)
-        }
+        speakText(text)
     }
 
     return (

@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { User, Phone, ArrowRight } from 'lucide-react'
+import { supabase } from '../lib/supabase'
+import { toast } from 'sonner'
 
 /**
  * CustomerOnboarding
@@ -11,7 +13,9 @@ export default function CustomerOnboarding({ onComplete }) {
     const [phone, setPhone] = useState('')
     const [error, setError] = useState('')
 
-    const handleSubmit = (e) => {
+    const [isLoading, setIsLoading] = useState(false)
+
+    const handleSubmit = async (e) => {
         e.preventDefault()
         const trimmedName = name.trim()
         const trimmedPhone = phone.trim()
@@ -25,14 +29,54 @@ export default function CustomerOnboarding({ onComplete }) {
             return
         }
 
-        const customerData = { name: trimmedName, phone: trimmedPhone }
-        try {
-            localStorage.setItem('mrn_customer_data', JSON.stringify(customerData))
-        } catch (e) {
-            console.error('Failed to save customer data:', e)
-        }
+        setIsLoading(true)
 
-        onComplete(customerData)
+        try {
+            // Check if phone number exists in db
+            const { data: existingCustomer, error: fetchError } = await supabase
+                .from('customers')
+                .select('name')
+                .eq('phone', trimmedPhone)
+                .single()
+
+            if (existingCustomer) {
+                // Phone exists, check if name matches
+                if (existingCustomer.name.toLowerCase() === trimmedName.toLowerCase()) {
+                    toast.success(`Welcome back, ${trimmedName}!`)
+                } else {
+                    setError(`This mobile number is already registered to a different name. Please use a different number.`)
+                    setIsLoading(false)
+                    return
+                }
+            } else if (fetchError?.code === 'PGRST116') {
+                // Not found - Create new user
+                const { error: insertError } = await supabase
+                    .from('customers')
+                    .insert([{ phone: trimmedPhone, name: trimmedName }])
+
+                if (insertError) {
+                    throw insertError
+                }
+                toast.success('Registration successful!')
+            } else {
+                throw fetchError
+            }
+
+            // Save to local storage
+            const customerData = { name: trimmedName, phone: trimmedPhone }
+            try {
+                localStorage.setItem('mrn_customer_data', JSON.stringify(customerData))
+            } catch (e) {
+                console.error('Failed to save customer data:', e)
+            }
+
+            onComplete(customerData)
+        } catch (err) {
+            console.error('Database error during onboarding:', err)
+            setError('Something went wrong. Please try again or check your connection.')
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     return (
@@ -89,9 +133,17 @@ export default function CustomerOnboarding({ onComplete }) {
 
                     <button
                         type="submit"
-                        className="w-full bg-[#023430] text-white py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-lg"
+                        disabled={isLoading}
+                        className="w-full bg-[#023430] text-white py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
                     >
-                        Start Shopping <ArrowRight size={18} />
+                        {isLoading ? (
+                            <>
+                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                Checking...
+                            </>
+                        ) : (
+                            <>Start Shopping <ArrowRight size={18} /></>
+                        )}
                     </button>
                 </form>
             </div>

@@ -12,6 +12,9 @@ import { supabase } from './lib/supabase'
 // App Mode: 'customer' or 'admin'
 const APP_MODE = import.meta.env.VITE_APP_MODE || 'customer'
 
+// Current build version of the Customer App. Increase when publishing new APKs.
+const APP_BUILD_VERSION = 1
+
 // Lazy loaded pages
 const Home = lazy(() => import('./pages/Home'))
 const Checkout = lazy(() => import('./pages/Checkout'))
@@ -38,6 +41,34 @@ function App() {
             return !localStorage.getItem('mrn_customer_data')
         } catch { return false }
     })
+
+    const [updateRequired, setUpdateRequired] = useState(false)
+
+    // Check for App Update (Customer Only)
+    useEffect(() => {
+        if (APP_MODE !== 'customer' || !Capacitor.isNativePlatform()) return
+
+        const checkVersion = async () => {
+            try {
+                const { data } = await supabase
+                    .from('store_settings')
+                    .select('value')
+                    .eq('key', 'latest_app_version')
+                    .single()
+
+                if (data && data.value) {
+                    const latestVersion = parseInt(data.value, 10)
+                    if (latestVersion > APP_BUILD_VERSION) {
+                        setUpdateRequired(true)
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to check app version:", err)
+            }
+        }
+
+        checkVersion()
+    }, [])
 
     // Android hardware back button: navigate home instead of closing app
     useEffect(() => {
@@ -121,8 +152,29 @@ function App() {
 
     return (
         <CartProvider>
+            {/* Mandatory Update Screen */}
+            {updateRequired && (
+                <div className="fixed inset-0 z-[9999] bg-[#023430] flex flex-col justify-center items-center p-6 text-center animate-fadeIn">
+                    <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl flex flex-col items-center">
+                        <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-6">
+                            <span className="text-4xl">🚀</span>
+                        </div>
+                        <h2 className="text-2xl font-black text-gray-900 mb-2">Update Required</h2>
+                        <p className="text-base text-gray-600 mb-8 leading-relaxed">
+                            This version of MRN Mulla Kirana is no longer supported. Please update to receive the latest features and bug fixes!
+                        </p>
+                        <a
+                            href="https://www.dropbox.com/scl/fi/f8vpxoz12jfztn6brf8zz/MRN-Mulla-Kirana.apk?rlkey=xut6avgeej9zh9rvxs5opuqfn&st=2aplj0te&dl=1"
+                            className="w-full bg-[#023430] text-white py-4 rounded-xl font-bold text-lg hover:scale-105 active:scale-95 transition-all shadow-lg flex justify-center items-center gap-2"
+                        >
+                            Download Update Now
+                        </a>
+                    </div>
+                </div>
+            )}
+
             {/* Customer onboarding: shown once on first launch */}
-            {showOnboarding && (
+            {!updateRequired && showOnboarding && (
                 <CustomerOnboarding onComplete={() => setShowOnboarding(false)} />
             )}
             <Router>

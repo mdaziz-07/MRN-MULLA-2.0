@@ -2,13 +2,14 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
     ChevronLeft, MapPin, ShoppingBag, CreditCard, Banknote,
-    Target, Navigation, CheckCircle, Trash2, Plus, Minus
+    Target, Navigation, CheckCircle, Trash2, Plus, Minus, PackagePlus
 } from 'lucide-react'
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import { useCart } from '../context/CartContext'
 import { supabase, STORE_LOCATION, DELIVERY_RADIUS_KM, STORE_PHONE, RAZORPAY_KEY_ID, STORE_NAME } from '../lib/supabase'
 import { toast } from 'sonner'
+import { PRODUCTS } from '../data/products'
 
 // Fix Leaflet default icon
 delete L.Icon.Default.prototype._getIconUrl
@@ -74,7 +75,11 @@ const loadRazorpayScript = () => {
 
 export default function Checkout() {
     const navigate = useNavigate()
-    const { items, incrementQty, decrementQty, removeFromCart, clearCart } = useCart()
+    const { items, incrementQty, decrementQty, removeFromCart, clearCart, addToCart } = useCart()
+
+    // Bundle Suggestions State
+    const [bundles, setBundles] = useState([])
+    const [suggestedProducts, setSuggestedProducts] = useState([])
 
     // Load saved customer data
     const savedCustomer = (() => {
@@ -91,6 +96,12 @@ export default function Checkout() {
     const [area, setArea] = useState(savedCustomer?.area || '')
     const [paymentMethod, setPaymentMethod] = useState('cod')
     const [userLocation, setUserLocation] = useState(savedCustomer?.location || null)
+
+    // Address Book State
+    const [savedAddresses, setSavedAddresses] = useState([])
+    const [selectedAddressIndex, setSelectedAddressIndex] = useState(-1)
+    const [isAddingNewAddress, setIsAddingNewAddress] = useState(false)
+
     const [distance, setDistance] = useState(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [detectingGPS, setDetectingGPS] = useState(false)
@@ -98,6 +109,56 @@ export default function Checkout() {
     const [orderId, setOrderId] = useState(null)
     const [deliveryCharge, setDeliveryCharge] = useState(0)
     const [minOrderForFreeDelivery, setMinOrderForFreeDelivery] = useState(0)
+
+    // Load bundles from Supabase
+    useEffect(() => {
+        const fetchBundles = async () => {
+            try {
+                const { data } = await supabase
+                    .from('store_settings')
+                    .select('value')
+                    .eq('key', 'product_bundles')
+                    .single()
+
+                if (data && data.value) {
+                    setBundles(JSON.parse(data.value))
+                }
+            } catch (e) {
+                console.error("Failed to load bundles for checkout suggestions:", e)
+            }
+        }
+        fetchBundles()
+    }, [])
+
+    // Compute Bundle Suggestions
+    useEffect(() => {
+        if (!bundles.length || !items.length) {
+            setSuggestedProducts([])
+            return
+        }
+
+        const cartItemIds = items.map(i => i.id)
+        let suggestions = []
+
+        bundles.forEach(bundle => {
+            // Check if cart has at least one item from this bundle
+            const hasItemInBundle = bundle.items.some(id => cartItemIds.includes(id))
+
+            if (hasItemInBundle) {
+                // Suggest the other items in the bundle that are NOT currently in the cart
+                const missingItems = bundle.items.filter(id => !cartItemIds.includes(id))
+                missingItems.forEach(missingId => {
+                    const product = PRODUCTS.find(p => p.id === missingId)
+                    // Avoid duplicates and ensure product exists
+                    if (product && !suggestions.find(s => s.id === product.id)) {
+                        suggestions.push({ ...product, bundleName: bundle.name })
+                    }
+                })
+            }
+        })
+
+        setSuggestedProducts(suggestions)
+    }, [bundles, items])
 
     // Calculate totals
     const subtotal = items.reduce((sum, item) => sum + (item.price * item.qty), 0)
@@ -135,30 +196,49 @@ export default function Checkout() {
         }
     }, [userLocation])
 
-    // Auto-fill address from last order when phone number is entered
+    // Fetch saved addresses from the new 'customers' table using the known phone
     useEffect(() => {
         if (phone.length === 10) {
-            const fetchLastAddress = async () => {
+            const fetchAddresses = async () => {
                 const { data, error } = await supabase
-                    .from('orders')
-                    .select('customer_json')
-                    .eq('customer_json->>mobile', phone)
-                    .order('created_at', { ascending: false })
-                    .limit(1)
-                    .maybeSingle()
+                    .from('customers')
+                    .select('addresses')
+                    .eq('phone', phone)
+                    .single()
 
-                if (data?.customer_json) {
-                    const c = data.customer_json
-                    if (c.name) setName(c.name)
-                    if (c.house_no) setHouseNo(c.house_no)
-                    if (c.area) setArea(c.area)
-                    if (c.location) handleLocationUpdate(c.location)
-                    toast.success('📍 Address autofilled from last order!')
+                if (data && data.addresses && data.addresses.length > 0) {
+                    setSavedAddresses(data.addresses)
+                    // Auto-select the last used address (usually the newest one at the end)
+                    handleSelectSavedAddress(data.addresses.length - 1, data.addresses)
+                } else {
+                    setIsAddingNewAddress(true)
                 }
             }
-            fetchLastAddress()
+            fetchAddresses()
         }
     }, [phone])
+
+    const handleSelectSavedAddress = (index, addressesArr = savedAddresses) => {
+        setSelectedAddressIndex(index)
+        setIsAddingNewAddress(false)
+        const addr = addressesArr[index]
+        setHouseNo(addr.houseNo)
+        setArea(addr.area)
+        handleLocationUpdate(addr.location)
+    }
+
+    const handleSelectNewAddressMode = () => {
+        setSelectedAddressIndex(-1)
+        setIsAddingNewAddress(true)
+        setHouseNo('')
+        setArea('')
+        // Try starting near their last location if it exists
+        if (savedAddresses.length > 0) {
+            handleLocationUpdate(savedAddresses[savedAddresses.length - 1].location)
+        } else {
+            handleLocationUpdate(STORE_LOCATION)
+        }
+    }
 
     const handleLocationUpdate = (loc) => {
         setUserLocation(loc)
@@ -314,6 +394,26 @@ export default function Checkout() {
             .select()
 
         if (error) throw error
+
+        // If checking out with a NEW address, append it to the `customers` table's array
+        if (isAddingNewAddress) {
+            const newAddress = {
+                id: Date.now().toString(),
+                houseNo: houseNo.trim(),
+                area: area.trim(),
+                location: userLocation
+            }
+            const updatedAddresses = [...savedAddresses, newAddress]
+
+            // Fire and forget updating the customers table
+            supabase
+                .from('customers')
+                .update({ addresses: updatedAddresses })
+                .eq('phone', phone)
+                .then(({ error: updateErr }) => {
+                    if (updateErr) console.error("Could not save new address to address book", updateErr)
+                })
+        }
 
         const printItems = items.filter(i => i.type === 'print')
         if (printItems.length > 0) {
@@ -585,89 +685,120 @@ export default function Checkout() {
                     </div>
 
                     <div className="space-y-4">
-                        {savedCustomer?.phone && savedCustomer?.name ? (
-                            <div className="bg-gray-50 rounded-xl p-3 flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm font-bold text-gray-900">{name}</p>
-                                    <p className="text-xs text-gray-500">📱 {phone}</p>
-                                </div>
-                                <button onClick={clearSavedCustomer} className="text-xs text-[#023430] font-bold px-3 py-1.5 rounded-lg bg-white border border-gray-200">Edit</button>
+                        <div className="bg-gray-50 rounded-xl p-3 flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-bold text-gray-900">{name}</p>
+                                <p className="text-xs text-gray-500">📱 {phone}</p>
                             </div>
-                        ) : (
-                            <>
-                                <div>
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 block">Phone Number</label>
-                                    <input type="tel" placeholder="Enter 10-digit number" className="input-field" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} maxLength={10} />
+                            <button onClick={clearSavedCustomer} className="text-xs text-[#023430] font-bold px-3 py-1.5 rounded-lg bg-white border border-gray-200">Change Contact</button>
+                        </div>
+
+                        {/* Address Book UI */}
+                        {savedAddresses.length > 0 && (
+                            <div className="space-y-3 pt-2">
+                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 block">Select Delivery Address</label>
+
+                                {savedAddresses.map((addr, index) => (
+                                    <div
+                                        key={addr.id || index}
+                                        onClick={() => handleSelectSavedAddress(index)}
+                                        className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${selectedAddressIndex === index ? 'border-[#023430] bg-[#023430]/5' : 'border-gray-100 bg-white hover:border-gray-300'}`}
+                                    >
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex gap-3">
+                                                <div className={`mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${selectedAddressIndex === index ? 'border-[#023430]' : 'border-gray-300'}`}>
+                                                    {selectedAddressIndex === index && <div className="w-2 h-2 rounded-full bg-[#023430]" />}
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-bold text-gray-900 mb-0.5">{addr.houseNo}</p>
+                                                    <p className="text-xs text-gray-500 line-clamp-2">{addr.area}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+
+                                <div
+                                    onClick={handleSelectNewAddressMode}
+                                    className={`p-3 rounded-xl border-2 border-dashed cursor-pointer transition-all flex items-center gap-3 ${isAddingNewAddress ? 'border-[#023430] bg-[#023430]/5' : 'border-gray-300 bg-gray-50 hover:bg-gray-100'}`}
+                                >
+                                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${isAddingNewAddress ? 'border-[#023430]' : 'border-gray-300'}`}>
+                                        {isAddingNewAddress && <div className="w-2 h-2 rounded-full bg-[#023430]" />}
+                                    </div>
+                                    <span className={`text-sm font-bold ${isAddingNewAddress ? 'text-[#023430]' : 'text-gray-600'}`}>+ Add New Address</span>
                                 </div>
-                                <div>
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 block">Full Name</label>
-                                    <input type="text" placeholder="Enter your full name" className="input-field" value={name} onChange={(e) => setName(e.target.value)} />
-                                </div>
-                            </>
+                            </div>
                         )}
-                        <div className="grid grid-cols-2 gap-3">
-                            <div>
-                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 block">House No.</label>
-                                <input type="text" placeholder="House no." className="input-field" value={houseNo} onChange={(e) => setHouseNo(e.target.value)} />
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 block">Area / Road</label>
-                                <input type="text" placeholder="Area / Road" className="input-field" value={area} onChange={(e) => setArea(e.target.value)} />
-                            </div>
-                        </div>
-                    </div>
 
-                    {/* Map Section */}
-                    <div className="mt-5">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">Pin Location on Map</label>
-
-                        <div className="w-full h-80 rounded-xl mb-3 overflow-hidden border border-gray-200 relative z-0">
-                            <MapContainer
-                                center={mapCenter}
-                                zoom={15}
-                                style={{ height: '100%', width: '100%' }}
-                                zoomControl={false}
-                                attributionControl={false}
-                            >
-                                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                                <Marker position={[STORE_LOCATION.lat, STORE_LOCATION.lng]} icon={storeIcon} />
-                                {userLocation && (
-                                    <DraggableMarker
-                                        position={userLocation}
-                                        onPositionChange={handleLocationUpdate}
-                                    />
-                                )}
-                                <MapClickHandler onLocationSelect={handleLocationUpdate} />
-                            </MapContainer>
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                            <button
-                                onClick={detectLocation}
-                                disabled={detectingGPS}
-                                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-700 font-semibold text-sm disabled:opacity-50 active:scale-95 transition-all shadow-sm hover:border-gray-300"
-                            >
-                                {detectingGPS ? (
-                                    <>
-                                        <div className="w-4 h-4 border-2 border-gray-400/30 border-t-gray-600 rounded-full animate-spin" />
-                                        Detecting...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Target size={16} />
-                                        Use GPS
-                                    </>
-                                )}
-                            </button>
-
-                            {distance !== null && (
-                                <div className={`flex items-center gap-1.5 text-sm font-semibold ${distance > DELIVERY_RADIUS_KM ? 'text-red-500' : 'text-emerald-600'}`}>
-                                    <Navigation size={14} />
-                                    {distance.toFixed(2)} km
-                                    {distance > DELIVERY_RADIUS_KM && <span className="text-xs text-red-400 ml-1">Out of range!</span>}
+                        {/* New Address Form (Always show if no saved addresses, or if they clicked "Add New Address") */}
+                        {(savedAddresses.length === 0 || isAddingNewAddress) && (
+                            <div className="mt-4 p-4 rounded-xl border border-[#023430]/20 bg-emerald-50/50 animate-fadeIn">
+                                <h3 className="text-xs font-bold text-[#023430] mb-3 uppercase tracking-wider">New Address Details</h3>
+                                <div className="grid grid-cols-2 gap-3 mb-4">
+                                    <div>
+                                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block">House No.</label>
+                                        <input type="text" placeholder="House no." className="input-field bg-white" value={houseNo} onChange={(e) => setHouseNo(e.target.value)} />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block">Area / Road</label>
+                                        <input type="text" placeholder="Area / Road" className="input-field bg-white" value={area} onChange={(e) => setArea(e.target.value)} />
+                                    </div>
                                 </div>
-                            )}
-                        </div>
+
+                                {/* Map Section inside New Address Form */}
+                                <div>
+                                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Pin Precise Location on Map <span className="text-red-500">*</span></label>
+
+                                    <div className="w-full h-64 rounded-xl mb-3 overflow-hidden border border-gray-200 relative z-0">
+                                        <MapContainer
+                                            center={mapCenter}
+                                            zoom={15}
+                                            style={{ height: '100%', width: '100%' }}
+                                            zoomControl={false}
+                                            attributionControl={false}
+                                        >
+                                            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                                            <Marker position={[STORE_LOCATION.lat, STORE_LOCATION.lng]} icon={storeIcon} />
+                                            {userLocation && (
+                                                <DraggableMarker
+                                                    position={userLocation}
+                                                    onPositionChange={handleLocationUpdate}
+                                                />
+                                            )}
+                                            <MapClickHandler onLocationSelect={handleLocationUpdate} />
+                                        </MapContainer>
+                                    </div>
+
+                                    <div className="flex items-center gap-3">
+                                        <button
+                                            onClick={detectLocation}
+                                            disabled={detectingGPS}
+                                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-emerald-200 text-emerald-800 font-bold text-sm disabled:opacity-50 active:scale-95 transition-all shadow-sm hover:border-emerald-300"
+                                        >
+                                            {detectingGPS ? (
+                                                <>
+                                                    <div className="w-4 h-4 border-2 border-emerald-400/30 border-t-emerald-600 rounded-full animate-spin" />
+                                                    Detecting...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Target size={16} />
+                                                    Use GPS
+                                                </>
+                                            )}
+                                        </button>
+
+                                        {distance !== null && (
+                                            <div className={`flex items-center gap-1.5 text-sm font-semibold ${distance > DELIVERY_RADIUS_KM ? 'text-red-500' : 'text-emerald-600'}`}>
+                                                <Navigation size={14} />
+                                                {distance.toFixed(2)} km
+                                                {distance > DELIVERY_RADIUS_KM && <span className="text-xs text-red-500 ml-1">Out of range!</span>}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </section>
 
@@ -736,6 +867,51 @@ export default function Checkout() {
                         </div>
                     </div>
                 </section>
+
+                {/* Bundle Suggestions (Frequently Bought Together) */}
+                {suggestedProducts.length > 0 && (
+                    <section className="bg-white p-5 mb-2 mx-3 rounded-2xl shadow-sm border border-green-100 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-green-50 rounded-full blur-3xl -z-10 opacity-70"></div>
+
+                        <div className="flex items-center gap-2 mb-4">
+                            <PackagePlus className="text-emerald-600" size={18} />
+                            <h2 className="text-xs font-bold text-gray-800 uppercase tracking-widest">Frequently Bought Together</h2>
+                        </div>
+
+                        <div className="flex overflow-x-auto gap-3 pb-2 snap-x hide-scrollbar">
+                            {suggestedProducts.map(product => (
+                                <div key={product.id} className="min-w-[140px] max-w-[140px] bg-white border border-gray-100 rounded-xl p-3 snap-start shadow-sm flex flex-col items-center text-center">
+                                    <div className="w-16 h-16 bg-gray-50 rounded-lg p-1.5 flex items-center justify-center mb-2">
+                                        <img
+                                            src={product.image_url}
+                                            alt={product.name}
+                                            className="w-full h-full object-contain mix-blend-multiply"
+                                        />
+                                    </div>
+                                    <div className="flex-1 w-full flex flex-col justify-end">
+                                        <h3 className="text-[11px] font-bold text-gray-900 leading-tight mb-1 line-clamp-2">{product.name}</h3>
+                                        <p className="text-[10px] text-gray-500 uppercase flex-1 mb-2">{product.pack_size} {product.unit}</p>
+                                        <div className="w-full flex items-center justify-between">
+                                            <span className="text-xs font-black text-gray-900">₹{product.price}</span>
+                                            <button
+                                                onClick={() => {
+                                                    addToCart(product)
+                                                    toast.success(`Added ${product.name} to cart!`)
+                                                }}
+                                                className="w-7 h-7 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center font-bold active:bg-emerald-100 transition-colors"
+                                            >
+                                                <Plus size={14} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="w-full mt-2 pt-2 border-t border-gray-50">
+                                        <p className="text-[9px] font-semibold text-emerald-600 truncate">{product.bundleName}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                )}
 
                 {/* Payment Method Selection */}
                 <section className="mx-3 space-y-3 mb-6">

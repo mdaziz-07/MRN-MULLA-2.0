@@ -7,6 +7,7 @@ import SettingsTab from './tabs/SettingsTab'
 import { supabase } from '../../lib/supabase'
 import { KeepAwake } from '@capacitor-community/keep-awake'
 import { LocalNotifications } from '@capacitor/local-notifications'
+import { TextToSpeech } from '@capacitor-community/text-to-speech'
 import PrintRequestsTab from './tabs/PrintRequestsTab'
 import { toast } from 'sonner'
 import { CATEGORIES } from '../../data/products'
@@ -14,18 +15,20 @@ import OrdersTab from './tabs/OrdersTab'
 import ProductsTab from './tabs/ProductsTab'
 import ReportsTab from './tabs/ReportsTab'
 import AITab from './tabs/AITab'
+import BundlesTab from './tabs/BundlesTab'
 
 const TABS = [
     { id: 'orders', label: 'Orders', icon: Package },
     { id: 'print', label: 'Print', icon: Printer },
     { id: 'products', label: 'Products', icon: ShoppingBag },
+    { id: 'bundles', label: 'Bundles', icon: ShoppingBag },
     { id: 'reports', label: 'Reports', icon: BarChart3 },
     { id: 'voice', label: 'Voice AI', icon: Mic },
     { id: 'settings', label: 'Settings', icon: Settings },
 ]
 
-// Bottom tabs exclude Settings (moved to hamburger menu only)
-const BOTTOM_TABS = TABS.filter(t => t.id !== 'settings')
+// Bottom tabs exclude Settings and Bundles (moved to hamburger menu only)
+const BOTTOM_TABS = TABS.filter(t => t.id !== 'settings' && t.id !== 'bundles')
 
 export default function AdminDashboard({ onLogout }) {
     const [activeTab, setActiveTab] = useState('orders')
@@ -181,11 +184,22 @@ export default function AdminDashboard({ onLogout }) {
                 playNotifSound()
 
                 // TTS Alert
-                const utterance = new SpeechSynthesisUtterance('New Order Received! Check now.')
-                utterance.rate = 1.0
-                utterance.pitch = 1.1
-                utterance.volume = 1.0
-                window.speechSynthesis.speak(utterance)
+                try {
+                    await TextToSpeech.speak({
+                        text: 'New Order Received! Check now.',
+                        lang: 'en-IN',
+                        rate: 1.0,
+                        pitch: 1.1,
+                        volume: 1.0,
+                        category: 'ambient',
+                    })
+                } catch (e) {
+                    const utterance = new SpeechSynthesisUtterance('New Order Received! Check now.')
+                    utterance.rate = 1.0
+                    utterance.pitch = 1.1
+                    utterance.volume = 1.0
+                    window.speechSynthesis.speak(utterance)
+                }
 
                 // Capacitor Local Notification (only needed if you want a system tray alert while app is open)
                 await LocalNotifications.schedule({
@@ -291,7 +305,7 @@ export default function AdminDashboard({ onLogout }) {
 
                 {/* Nav Links */}
                 <nav className="flex-1 py-4 px-3 space-y-1">
-                    {TABS.map(tab => {
+                    {TABS.filter(t => t.id === 'bundles' || t.id === 'settings').map(tab => {
                         const Icon = tab.icon
                         const isActive = activeTab === tab.id
                         return (
@@ -357,7 +371,7 @@ export default function AdminDashboard({ onLogout }) {
                         </div>
 
                         <nav className="flex-1 py-4 px-3 space-y-1">
-                            {TABS.map(tab => {
+                            {TABS.filter(t => t.id === 'bundles' || t.id === 'settings').map(tab => {
                                 const Icon = tab.icon
                                 const isActive = activeTab === tab.id
                                 return (
@@ -532,6 +546,7 @@ export default function AdminDashboard({ onLogout }) {
                     {activeTab === 'orders' && <OrdersTab />}
                     {activeTab === 'print' && <PrintRequestsTab />}
                     {activeTab === 'products' && <ProductsTab selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />}
+                    {activeTab === 'bundles' && <BundlesTab />}
                     {activeTab === 'reports' && <ReportsTab />}
                     {activeTab === 'voice' && <AITab />}
                     {activeTab === 'settings' && <SettingsTab />}

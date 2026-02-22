@@ -3,10 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom'
 import {
     Check, Phone, MessageCircle, Share2,
     Package, Bike, MapPin, Clock, ChevronLeft,
-    Calendar, ChevronDown, Search
+    Calendar, ChevronDown, Search, RefreshCw
 } from 'lucide-react'
 import { supabase, STORE_LOCATION, STORE_PHONE, STORE_NAME } from '../lib/supabase'
 import { toast } from 'sonner'
+import { useCart } from '../context/CartContext'
 
 const ORDER_STATUSES = ['Received', 'Preparing', 'Out for Delivery', 'Delivered']
 
@@ -29,6 +30,8 @@ export default function TrackOrder() {
     const [filterPeriod, setFilterPeriod] = useState('all') // 'today' or 'all'
     const [mobileInput, setMobileInput] = useState('')
     const [loggedInMobile, setLoggedInMobile] = useState('')
+    const [isReordering, setIsReordering] = useState(false)
+    const { replaceCart } = useCart()
 
     // Get saved mobile from localStorage
     useEffect(() => {
@@ -154,6 +157,64 @@ export default function TrackOrder() {
         return true
     })
 
+    const handleReorder = async (orderToReorder) => {
+        setIsReordering(true)
+        try {
+            // 1. Get all product IDs from the past order
+            // Exclude print orders or special items if necessary.
+            const previousItems = orderToReorder.cart_json || []
+            const itemIds = previousItems.map(item => item.id).filter(id => id)
+
+            if (itemIds.length === 0) {
+                toast.error('No valid items to reorder.')
+                setIsReordering(false)
+                return
+            }
+
+            // 2. Fetch the LATEST prices and details from the products table
+            const { data: latestProducts, error } = await supabase
+                .from('products')
+                .select('*')
+                .in('id', itemIds)
+
+            if (error) throw error
+
+            // 3. Match them up and build a new cart array
+            const newCartItems = []
+            let unavailableCount = 0
+
+            previousItems.forEach(prevItem => {
+                const liveProduct = latestProducts.find(p => p.id === prevItem.id)
+                if (liveProduct) {
+                    newCartItems.push({
+                        ...liveProduct, // Get all the latest info including price/image
+                        qty: prevItem.qty // Keep the old quantity
+                    })
+                } else {
+                    unavailableCount++
+                }
+            })
+
+            // 4. Replace the cart
+            if (newCartItems.length === 0) {
+                toast.error('Sorry, all items from this order are currently unavailable.')
+            } else {
+                replaceCart(newCartItems)
+                if (unavailableCount > 0) {
+                    toast.warning(`${unavailableCount} item(s) are no longer available and were skipped. Prices have been updated.`)
+                } else {
+                    toast.success('Cart updated with latest prices!')
+                }
+                setTimeout(() => navigate('/checkout'), 500)
+            }
+        } catch (err) {
+            console.error('Error during reorder:', err)
+            toast.error('Failed to reorder items.')
+        } finally {
+            setIsReordering(false)
+        }
+    }
+
     // Loading screen
     if (loading) {
         return (
@@ -170,7 +231,7 @@ export default function TrackOrder() {
     if (viewMode === 'list' && !loggedInMobile) {
         return (
             <div className="min-h-screen bg-[#F5F5F5]">
-                <header className="bg-white px-4 py-4 flex items-center gap-3 sticky top-0 z-10 shadow-sm">
+                <header className="bg-white px-4 py-4 safe-area-top flex items-center gap-3 sticky top-0 z-10 shadow-sm">
                     <button onClick={() => navigate('/')} className="active:scale-90 transition-transform">
                         <ChevronLeft size={24} className="text-gray-800" />
                     </button>
@@ -209,7 +270,7 @@ export default function TrackOrder() {
         return (
             <div className="min-h-screen bg-[#F5F5F5]">
                 {/* Header */}
-                <header className="bg-white px-4 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+                <header className="bg-white px-4 py-4 safe-area-top flex items-center justify-between sticky top-0 z-10 shadow-sm">
                     <div className="flex items-center gap-3">
                         <button onClick={() => navigate('/')} className="active:scale-90 transition-transform">
                             <ChevronLeft size={24} className="text-gray-800" />
@@ -351,7 +412,7 @@ export default function TrackOrder() {
     return (
         <div className="min-h-screen bg-[#F5F5F5]">
             {/* ─── Header ─── */}
-            <header className="bg-[#023430] text-white px-4 py-4 flex items-center justify-between">
+            <header className="bg-[#023430] text-white px-4 py-4 safe-area-top flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <button onClick={() => navigate('/orders')} className="active:scale-90 transition-transform">
                         <ChevronLeft size={24} />
@@ -421,6 +482,27 @@ export default function TrackOrder() {
                 {order.status === 'Delivered' && (
                     <p className="text-sm text-white/70 mt-1">Thank you for ordering! 🎉</p>
                 )}
+            </div>
+
+            {/* ─── Reorder Button ─── */}
+            <div className="px-6 py-2 -mt-4 relative z-20">
+                <button
+                    onClick={() => handleReorder(order)}
+                    disabled={isReordering}
+                    className="w-full flex items-center justify-center gap-2 bg-white text-[#023430] border-2 border-[#023430] py-3.5 rounded-xl font-bold hover:bg-gray-50 active:scale-95 transition-all shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                    {isReordering ? (
+                        <>
+                            <div className="w-5 h-5 border-2 border-[#023430]/30 border-t-[#023430] rounded-full animate-spin" />
+                            Fetching latest prices...
+                        </>
+                    ) : (
+                        <>
+                            <RefreshCw size={18} />
+                            Reorder Items
+                        </>
+                    )}
+                </button>
             </div>
 
             {/* ─── Status Timeline ─── */}

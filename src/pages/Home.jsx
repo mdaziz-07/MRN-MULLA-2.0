@@ -133,20 +133,30 @@ export default function Home() {
     const [products, setProducts] = useState(PRODUCTS)
     const [showAppPrompt, setShowAppPrompt] = useState(false)
 
-    // Check if running on web and hasn't dismissed the prompt
+    // Check if running on web and handle Deep Link / App Prompt
     useEffect(() => {
         const isWeb = Capacitor.getPlatform() === 'web'
         const hasDismissed = localStorage.getItem('hideAppPrompt') === 'true'
 
-        if (isWeb && !hasDismissed) {
-            // Slight delay to not hit them instantly on paint
-            const timer = setTimeout(() => setShowAppPrompt(true), 1500)
-            return () => clearTimeout(timer)
+        if (isWeb) {
+            // Attempt Android intent deep link redirect first
+            const isAndroid = /android/i.test(navigator.userAgent)
+            if (isAndroid && !sessionStorage.getItem('redirectAttempted')) {
+                sessionStorage.setItem('redirectAttempted', 'true')
+                // Try to open the app via intent.
+                // If it fails, the browser ignores it and we proceed to show the prompt.
+                window.location.href = "intent://#Intent;scheme=mrnmulla;package=com.mrnmulla.store;end"
+            }
+
+            // Show prompt if not dismissed
+            if (!hasDismissed) {
+                const timer = setTimeout(() => setShowAppPrompt(true), 1500)
+                return () => clearTimeout(timer)
+            }
         }
     }, [])
 
     const handleDismissPrompt = () => {
-        setShowAppPrompt(false)
         localStorage.setItem('hideAppPrompt', 'true')
     }
 
@@ -330,7 +340,7 @@ export default function Home() {
             </div>
 
             {/* ─── SEARCH BAR — sticky with safe-area header protector ─── */}
-            <div className={`sticky top-0 z-50 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.5rem)] bg-[#023430] rounded-b-2xl ${scrolled ? 'shadow-lg' : 'shadow-md'}`}>
+            <div className={`sticky top-0 z-50 px-4 pb-3 pt-2 bg-[#023430] rounded-b-2xl ${scrolled ? 'shadow-lg' : 'shadow-md'}`}>
                 <div className="relative">
                     <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
@@ -372,7 +382,7 @@ export default function Home() {
                             }
                         `}>
                             {cat.image ? (
-                                <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" />
+                                <img src={cat.image} alt={cat.name} className="w-full h-full object-contain p-2 mix-blend-multiply" />
                             ) : (
                                 <span className="text-2xl md:text-3xl">{cat.icon}</span>
                             )}
@@ -411,7 +421,7 @@ export default function Home() {
                 )}
 
                 {filteredProducts.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
+                    <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 md:gap-4">
                         {filteredProducts.map(product => (
                             <ProductCard
                                 key={product.id}

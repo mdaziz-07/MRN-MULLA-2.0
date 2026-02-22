@@ -49,6 +49,8 @@ const cartReducer = (state, action) => {
         }
         case 'CLEAR':
             return { ...state, items: [] }
+        case 'REPLACE_CART':
+            return { ...state, items: action.payload }
         case 'LOAD':
             return { ...state, items: action.payload }
         default:
@@ -96,6 +98,10 @@ export function CartProvider({ children }) {
         dispatch({ type: 'CLEAR' })
     }, [])
 
+    const replaceCart = useCallback((newItems) => {
+        dispatch({ type: 'REPLACE_CART', payload: newItems })
+    }, [])
+
     const getQty = useCallback((productId) => {
         const item = state.items.find(i => i.id === productId)
         return item ? item.qty : 0
@@ -117,6 +123,7 @@ export function CartProvider({ children }) {
                 incrementQty,
                 decrementQty,
                 clearCart,
+                replaceCart,
                 getQty,
                 isInCart,
                 totalItems,
