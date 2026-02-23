@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Plus, Trash2, Search, Package, Save, RefreshCw } from 'lucide-react'
+import { Plus, Trash2, Search, Package, Save, RefreshCw, X } from 'lucide-react'
 import { supabase } from '../../../lib/supabase'
 import { toast } from 'sonner'
 import { PRODUCTS } from '../../../data/products'
