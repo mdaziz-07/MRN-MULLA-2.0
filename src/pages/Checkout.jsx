@@ -389,12 +389,20 @@ export default function Checkout() {
 
     const saveCustomerData = () => {
         try {
-            localStorage.setItem('mrn_customer_data', JSON.stringify({
-                phone: phone.trim(),
-                name: name.trim(),
+            const existing = JSON.parse(localStorage.getItem('mrn_customer_data') || '{}')
+            const currentAddr = {
                 houseNo: houseNo.trim(),
                 area: area.trim(),
+                location: userLocation
+            }
+            localStorage.setItem('mrn_customer_data', JSON.stringify({
+                ...existing,
+                phone: phone.trim(),
+                name: name.trim(),
+                house_no: houseNo.trim(),
+                area: area.trim(),
                 location: userLocation,
+                activeAddress: currentAddr
             }))
         } catch (e) {
             console.error('Failed to save customer data:', e)
@@ -445,12 +453,17 @@ export default function Checkout() {
 
         if (error) throw error
 
-        // If checking out with a NEW address, append it to the `customers` table's array
-        if (isAddingNewAddress) {
+        // If the current address is not in the address book, save it
+        const currentTrimmedHouse = houseNo.trim()
+        const currentTrimmedArea = area.trim()
+
+        const isExactMatch = savedAddresses.some(a => a.houseNo === currentTrimmedHouse && a.area === currentTrimmedArea)
+
+        if (!isExactMatch && currentTrimmedArea) {
             const newAddress = {
                 id: Date.now().toString(),
-                houseNo: houseNo.trim(),
-                area: area.trim(),
+                houseNo: currentTrimmedHouse,
+                area: currentTrimmedArea,
                 location: userLocation
             }
             const updatedAddresses = [...savedAddresses, newAddress]
@@ -780,10 +793,10 @@ export default function Checkout() {
                             </div>
                         )}
 
-                        {/* New Address Form (Always show if no saved addresses, or if they clicked "Add New Address") */}
-                        {(savedAddresses.length === 0 || isAddingNewAddress) && (
+                        {/* Delivery Address Form (Always show so user can edit their currently selected address) */}
+                        {true && (
                             <div className="mt-4 p-4 rounded-xl border border-[#023430]/20 bg-emerald-50/50 animate-fadeIn">
-                                <h3 className="text-xs font-bold text-[#023430] mb-3 uppercase tracking-wider">New Address Details</h3>
+                                <h3 className="text-xs font-bold text-[#023430] mb-3 uppercase tracking-wider">Delivery Details (Editable)</h3>
                                 <div className="grid grid-cols-2 gap-3 mb-4">
                                     <div>
                                         <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block">House No.</label>
