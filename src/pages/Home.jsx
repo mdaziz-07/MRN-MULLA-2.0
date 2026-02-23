@@ -371,6 +371,22 @@ export default function Home() {
     return (
         <div className="min-h-screen bg-gray-50 pb-32">
 
+            {/* ─── WEB-ONLY APK DOWNLOAD BANNER ─── */}
+            {Capacitor.getPlatform() === 'web' && (
+                <div className="bg-[#E0A75E] text-[#023430] px-4 py-2 flex items-center justify-between z-20 relative shadow-sm">
+                    <div className="flex items-center gap-2">
+                        <Download size={16} className="animate-bounce" />
+                        <span className="text-xs font-black uppercase tracking-wider">Get the App!</span>
+                    </div>
+                    <a
+                        href="https://www.dropbox.com/scl/fi/f8vpxoz12jfztn6brf8zz/MRN-Mulla-Kirana.apk?rlkey=xut6avgeej9zh9rvxs5opuqfn&st=2aplj0te&dl=1"
+                        className="bg-[#023430] text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-sm active:scale-95 transition-transform"
+                    >
+                        Download 🚀
+                    </a>
+                </div>
+            )}
+
             {/* ─── HEADER ─── */}
             <div className="bg-[#023430] text-white pt-[calc(env(safe-area-inset-top)+1.2rem)] pb-3 px-5 relative z-10">
                 <div className="flex justify-between items-start mb-3">

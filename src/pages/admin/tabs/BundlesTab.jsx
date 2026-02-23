@@ -145,16 +145,22 @@ export default function BundlesTab() {
 
                     {/* Selected Products Summary */}
                     {selectedProducts.length > 0 && (
-                        <div className="mb-4 p-3 bg-green-50 rounded-xl border border-green-200">
+                        <div className="mb-4 p-3 bg-green-50 rounded-xl border border-green-200 shrink-0">
                             <h3 className="text-xs font-bold text-green-800 uppercase tracking-wider mb-2">Selected Items ({selectedProducts.length})</h3>
                             <div className="flex flex-wrap gap-2">
                                 {selectedProducts.map(id => {
                                     const prod = allProducts.find(p => p.id === id)
                                     if (!prod) return null
                                     return (
-                                        <div key={id} className="bg-white border border-green-300 text-green-900 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
+                                        <div key={id} className="bg-white border border-green-300 text-green-900 text-xs font-semibold pl-2.5 pr-1.5 py-1 rounded-full flex items-center gap-1.5 shadow-sm group">
                                             <span className="truncate max-w-[120px]">{prod.name}</span>
-                                            <span className="font-bold text-green-700 ml-1">₹{prod.price}</span>
+                                            <span className="font-bold text-green-700">₹{prod.price}</span>
+                                            <button
+                                                onClick={() => toggleProductSelection(id)}
+                                                className="w-4 h-4 rounded-full hover:bg-red-100 text-green-700 hover:text-red-600 flex items-center justify-center transition-colors"
+                                            >
+                                                <X size={12} strokeWidth={3} />
+                                            </button>
                                         </div>
                                     )
                                 })}
