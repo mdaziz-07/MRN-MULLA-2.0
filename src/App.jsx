@@ -77,7 +77,10 @@ function App() {
         import('@capacitor/app').then(({ App: CapApp }) => {
             if (APP_MODE === 'customer') {
                 CapApp.addListener('backButton', ({ canGoBack }) => {
-                    if (window.location.pathname !== '/') {
+                    const path = window.location.pathname
+                    if (path.startsWith('/track')) {
+                        window.location.href = '/orders'
+                    } else if (path !== '/') {
                         window.location.href = '/'
                     } else {
                         CapApp.minimizeApp()

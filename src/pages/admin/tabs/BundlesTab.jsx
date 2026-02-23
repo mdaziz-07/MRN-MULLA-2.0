@@ -198,8 +198,8 @@ export default function BundlesTab() {
                                     <div className="w-10 h-10 bg-white rounded flex items-center justify-center p-1 shrink-0">
                                         <img src={product.image_url} alt="" className="w-full h-full object-contain mix-blend-multiply" />
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-bold text-gray-900 truncate">{product.name}</p>
+                                    <div className="flex-1 min-w-0 pr-1">
+                                        <p className="text-sm font-bold text-gray-900 break-words leading-tight line-clamp-2 mb-0.5">{product.name}</p>
                                         <p className="text-[10px] text-gray-500 uppercase">{product.category} • ₹{product.price}</p>
                                     </div>
                                 </div>

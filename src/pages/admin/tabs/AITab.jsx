@@ -6,7 +6,7 @@ import { SpeechRecognition } from '@capacitor-community/speech-recognition'
 import { TextToSpeech } from '@capacitor-community/text-to-speech'
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyCGb0717T0mo_1C2ou1i108q88jVPfBMkU`
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyCGb0717T0mo_1C2ou1i108q88jVPfBMkU`
 
 const EXAMPLE_COMMANDS = [
     { text: 'Update Toor Dal price to 95', icon: '💰', category: 'Price' },
