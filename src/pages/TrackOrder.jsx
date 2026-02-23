@@ -328,8 +328,7 @@ export default function TrackOrder() {
                             return (
                                 <div
                                     key={o.id}
-                                    className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow"
-                                    onClick={() => navigate(`/track/${o.id}`)}
+                                    className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
                                 >
                                     {/* Order Header */}
                                     <div className="flex items-start justify-between mb-3">
@@ -378,9 +377,32 @@ export default function TrackOrder() {
                                     </div>
 
                                     {/* Total */}
-                                    <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+                                    <div className="flex justify-between items-center pt-3 border-t border-gray-100 mb-3">
                                         <span className="text-sm text-gray-500 font-medium">Total Amount</span>
                                         <span className="text-lg font-black text-[#023430]">₹{o.total_amount}</span>
+                                    </div>
+
+                                    {/* Actions */}
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                handleReorder(o)
+                                            }}
+                                            disabled={isReordering}
+                                            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-white border-2 border-[#023430] text-[#023430] font-bold text-sm hover:bg-gray-50 active:scale-95 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                                        >
+                                            <RefreshCw size={14} className={isReordering ? 'animate-spin' : ''} />
+                                            {isReordering ? 'Wait...' : 'Reorder'}
+                                        </button>
+                                        {o.status !== 'Delivered' && (
+                                            <button
+                                                onClick={() => navigate(`/track/${o.id}`)}
+                                                className="flex-1 py-2.5 rounded-xl bg-[#023430] text-white font-bold text-sm active:scale-95 transition-transform text-center shadow-sm"
+                                            >
+                                                Track
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             )
@@ -484,26 +506,7 @@ export default function TrackOrder() {
                 )}
             </div>
 
-            {/* ─── Reorder Button ─── */}
-            <div className="px-6 py-2 -mt-4 relative z-20">
-                <button
-                    onClick={() => handleReorder(order)}
-                    disabled={isReordering}
-                    className="w-full flex items-center justify-center gap-2 bg-white text-[#023430] border-2 border-[#023430] py-3.5 rounded-xl font-bold hover:bg-gray-50 active:scale-95 transition-all shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                    {isReordering ? (
-                        <>
-                            <div className="w-5 h-5 border-2 border-[#023430]/30 border-t-[#023430] rounded-full animate-spin" />
-                            Fetching latest prices...
-                        </>
-                    ) : (
-                        <>
-                            <RefreshCw size={18} />
-                            Reorder Items
-                        </>
-                    )}
-                </button>
-            </div>
+            {/* ─── Reorder Button (Removed from here, now in My Orders List) ─── */}
 
             {/* ─── Status Timeline ─── */}
             <div className="bg-white p-6 -mt-2 rounded-t-3xl relative z-10">

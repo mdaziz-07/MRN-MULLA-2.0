@@ -72,19 +72,36 @@ function App() {
 
     // Android hardware back button: navigate home instead of closing app
     useEffect(() => {
-        if (APP_MODE !== 'customer') return
-        let cleanup
+        let cleanupBack
+        let cleanupState
         import('@capacitor/app').then(({ App: CapApp }) => {
-            CapApp.addListener('backButton', ({ canGoBack }) => {
-                if (window.location.pathname !== '/') {
-                    window.location.href = '/'
-                } else {
-                    CapApp.minimizeApp()
-                }
-            })
-            cleanup = () => CapApp.removeAllListeners()
+            if (APP_MODE === 'customer') {
+                CapApp.addListener('backButton', ({ canGoBack }) => {
+                    if (window.location.pathname !== '/') {
+                        window.location.href = '/'
+                    } else {
+                        CapApp.minimizeApp()
+                    }
+                })
+            }
+
+            // Realtime Connection Fix for Mobile (Both Admin and Customer apps when resuming from background)
+            if (Capacitor.isNativePlatform()) {
+                CapApp.addListener('appStateChange', ({ isActive }) => {
+                    if (isActive) {
+                        console.log('App returned to Foreground. Refreshing realtime connection...')
+                        // Invalidate and reestablish realtime connections when waking up
+                        supabase.removeAllChannels()
+                        // Instead of a manual reconnect method we simulate an automatic reconnect by dispatching a custom event 
+                        // that Home.jsx and Admin App components can respond to if they want to rebuild their channels
+                        window.dispatchEvent(new Event('appResumed'))
+                    }
+                })
+            }
+
+            cleanupBack = () => CapApp.removeAllListeners()
         }).catch(() => { })
-        return () => cleanup?.()
+        return () => cleanupBack?.()
     }, [])
 
     // --- PUSH NOTIFICATION LOGIC (ADMIN ONLY) ---
@@ -164,7 +181,17 @@ function App() {
                             This version of MRN Mulla Kirana is no longer supported. Please update to receive the latest features and bug fixes!
                         </p>
                         <a
-                            href="https://www.dropbox.com/scl/fi/f8vpxoz12jfztn6brf8zz/MRN-Mulla-Kirana.apk?rlkey=xut6avgeej9zh9rvxs5opuqfn&st=2aplj0te&dl=1"
+                            onClick={async (e) => {
+                                e.preventDefault()
+                                const url = "https://www.dropbox.com/scl/fi/f8vpxoz12jfztn6brf8zz/MRN-Mulla-Kirana.apk?rlkey=xut6avgeej9zh9rvxs5opuqfn&st=2aplj0te&dl=1"
+                                if (Capacitor.isNativePlatform()) {
+                                    const { Browser } = await import('@capacitor/browser')
+                                    await Browser.open({ url })
+                                } else {
+                                    window.open(url, '_blank')
+                                }
+                            }}
+                            href="#"
                             className="w-full bg-[#023430] text-white py-4 rounded-xl font-bold text-lg hover:scale-105 active:scale-95 transition-all shadow-lg flex justify-center items-center gap-2"
                         >
                             Download Update Now

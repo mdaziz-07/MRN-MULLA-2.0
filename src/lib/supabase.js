@@ -20,4 +20,4 @@ export const DELIVERY_RADIUS_KM = 5
 export const IMGBB_API_KEY = import.meta.env.VITE_IMGBB_API_KEY || ''
 
 // Razorpay Key
-export const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || ''
+export const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_S5PRN3SjWllRi3'

@@ -132,7 +132,7 @@ export default function BundlesTab() {
                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-[#023430]/20 animate-slideUp">
                     <h2 className="text-lg font-bold text-gray-900 mb-4">Create New Bundle</h2>
 
-                    <div className="mb-6">
+                    <div className="mb-4">
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Bundle Name</label>
                         <input
                             type="text"
@@ -143,9 +143,28 @@ export default function BundlesTab() {
                         />
                     </div>
 
-                    <div className="mb-4 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+                    {/* Selected Products Summary */}
+                    {selectedProducts.length > 0 && (
+                        <div className="mb-4 p-3 bg-green-50 rounded-xl border border-green-200">
+                            <h3 className="text-xs font-bold text-green-800 uppercase tracking-wider mb-2">Selected Items ({selectedProducts.length})</h3>
+                            <div className="flex flex-wrap gap-2">
+                                {selectedProducts.map(id => {
+                                    const prod = allProducts.find(p => p.id === id)
+                                    if (!prod) return null
+                                    return (
+                                        <div key={id} className="bg-white border border-green-300 text-green-900 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
+                                            <span className="truncate max-w-[120px]">{prod.name}</span>
+                                            <span className="font-bold text-green-700 ml-1">₹{prod.price}</span>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="mb-3 flex flex-col sm:flex-row gap-2 justify-between items-start sm:items-center">
                         <label className="block text-sm font-semibold text-gray-700">
-                            Select Products ({selectedProducts.length} selected)
+                            Select Products
                         </label>
                         <div className="relative w-full sm:w-64">
                             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -154,12 +173,12 @@ export default function BundlesTab() {
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="Search products..."
-                                className="w-full pl-9 pr-4 py-2 bg-gray-50 rounded-lg text-sm outline-none border border-transparent focus:border-gray-200"
+                                className="w-full pl-9 pr-4 py-2 bg-gray-50 rounded-lg text-sm outline-none border border-gray-200 focus:border-[#023430]"
                             />
                         </div>
                     </div>
 
-                    <div className="h-64 overflow-y-auto border border-gray-100 rounded-xl p-2 mb-6 bg-gray-50">
+                    <div className="h-48 md:h-64 overflow-y-auto border border-gray-200 rounded-xl p-2 mb-4 bg-gray-50">
                         {filteredProducts.map(product => {
                             const isSelected = selectedProducts.includes(product.id)
                             return (

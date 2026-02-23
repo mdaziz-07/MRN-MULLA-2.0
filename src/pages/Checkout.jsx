@@ -89,13 +89,18 @@ export default function Checkout() {
         } catch { return null }
     })()
 
+    // Determine the active address context
+    const initialHouseNo = savedCustomer?.activeAddress?.houseNo || savedCustomer?.house_no || ''
+    const initialArea = savedCustomer?.activeAddress?.area || savedCustomer?.area || ''
+    const initialLocation = savedCustomer?.activeAddress?.location || savedCustomer?.location || null
+
     // Form state — pre-fill from saved data
     const [phone, setPhone] = useState(savedCustomer?.phone || '')
     const [name, setName] = useState(savedCustomer?.name || '')
-    const [houseNo, setHouseNo] = useState(savedCustomer?.houseNo || '')
-    const [area, setArea] = useState(savedCustomer?.area || '')
+    const [houseNo, setHouseNo] = useState(initialHouseNo)
+    const [area, setArea] = useState(initialArea)
     const [paymentMethod, setPaymentMethod] = useState('cod')
-    const [userLocation, setUserLocation] = useState(savedCustomer?.location || null)
+    const [userLocation, setUserLocation] = useState(initialLocation)
 
     // Address Book State
     const [savedAddresses, setSavedAddresses] = useState([])
@@ -165,8 +170,8 @@ export default function Checkout() {
     const totalAmount = subtotal + deliveryCharge
 
     const [mapCenter, setMapCenter] = useState(
-        savedCustomer?.location
-            ? [savedCustomer.location.lat, savedCustomer.location.lng]
+        initialLocation
+            ? [initialLocation.lat, initialLocation.lng]
             : [STORE_LOCATION.lat, STORE_LOCATION.lng]
     )
 
@@ -208,15 +213,28 @@ export default function Checkout() {
 
                 if (data && data.addresses && data.addresses.length > 0) {
                     setSavedAddresses(data.addresses)
-                    // Auto-select the last used address (usually the newest one at the end)
-                    handleSelectSavedAddress(data.addresses.length - 1, data.addresses)
+                    // If they came with an activeAddress from Home, try to find and auto-select it
+                    const activeIndex = data.addresses.findIndex(
+                        a => a.houseNo === initialHouseNo && a.area === initialArea
+                    )
+
+                    if (activeIndex >= 0) {
+                        handleSelectSavedAddress(activeIndex, data.addresses)
+                    } else if (!initialHouseNo && !initialArea) {
+                        // fallback to newest address if they have absolutely nothing set
+                        handleSelectSavedAddress(data.addresses.length - 1, data.addresses)
+                    } else {
+                        // They have customer_data locally but maybe it wasn't saved in cloud yet
+                        // Just keep current form state, mark as new address adding layout if it doesn't strictly match DB
+                        setIsAddingNewAddress(true)
+                    }
                 } else {
                     setIsAddingNewAddress(true)
                 }
             }
             fetchAddresses()
         }
-    }, [phone])
+    }, [phone, initialHouseNo, initialArea])
 
     const handleSelectSavedAddress = (index, addressesArr = savedAddresses) => {
         setSelectedAddressIndex(index)

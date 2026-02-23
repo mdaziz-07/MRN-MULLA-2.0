@@ -2,8 +2,7 @@ import { useState, useEffect, useMemo, useCallback, memo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
     Search, MapPin, ChevronRight, Plus, Minus, X,
-    ShoppingCart, ClipboardList, MessageCircle,
-    Star, ArrowRight, Printer, Scan, Download
+    ShoppingCart, ClipboardList, Printer, Download, Map, LogIn
 } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { PRODUCTS, CATEGORIES } from '../data/products'
@@ -130,10 +129,67 @@ export default function Home() {
     const [scrolled, setScrolled] = useState(false)
     const scrolledRef = useRef(false)
     const [shopOpen, setShopOpen] = useState(true)
-    const [products, setProducts] = useState(PRODUCTS)
     const [showAppPrompt, setShowAppPrompt] = useState(false)
+    const [showAddressModal, setShowAddressModal] = useState(false)
+    const [savedAddresses, setSavedAddresses] = useState([])
+    const [customerPhone, setCustomerPhone] = useState('')
 
-    // Check if running on web and handle Deep Link / App Prompt
+    // Read strictly active delivery address from local storage
+    const [activeAddress, setActiveAddress] = useState(() => {
+        try {
+            const data = localStorage.getItem('mrn_customer_data')
+            if (data) {
+                const parsed = JSON.parse(data)
+                // If they have an active address object, use its label. Otherwise try area. 
+                if (parsed.activeAddress && parsed.activeAddress.area) return `${parsed.activeAddress.houseNo ? parsed.activeAddress.houseNo + ', ' : ''}${parsed.activeAddress.area}`
+                if (parsed.area) return `${parsed.house_no ? parsed.house_no + ', ' : ''}${parsed.area}`
+            }
+        } catch { }
+        return 'Select Delivery Address'
+    })
+
+    // Load customer data for the address modal
+    useEffect(() => {
+        try {
+            const data = localStorage.getItem('mrn_customer_data')
+            if (data) {
+                const parsed = JSON.parse(data)
+                if (parsed.phone) {
+                    setCustomerPhone(parsed.phone)
+                    fetchAddressesForPhone(parsed.phone)
+                }
+            }
+        } catch { }
+    }, [])
+
+    const fetchAddressesForPhone = async (phone) => {
+        const { data, error } = await supabase
+            .from('customers')
+            .select('addresses')
+            .eq('phone', phone)
+            .single()
+
+        if (data && data.addresses && data.addresses.length > 0) {
+            setSavedAddresses(data.addresses)
+        }
+    }
+
+    const handleSelectAddress = (addr) => {
+        try {
+            const data = localStorage.getItem('mrn_customer_data')
+            const parsed = data ? JSON.parse(data) : {}
+            parsed.activeAddress = addr
+            // Keep backwards compatibility for Checkout.jsx
+            parsed.house_no = addr.houseNo
+            parsed.area = addr.area
+            if (addr.location) parsed.location = addr.location
+            localStorage.setItem('mrn_customer_data', JSON.stringify(parsed))
+
+            setActiveAddress(`${addr.houseNo ? addr.houseNo + ', ' : ''}${addr.area}`)
+            setShowAddressModal(false)
+            toast.success('Delivery address updated')
+        } catch { }
+    }
     useEffect(() => {
         const isWeb = Capacitor.getPlatform() === 'web'
         const hasDismissed = localStorage.getItem('hideAppPrompt') === 'true'
@@ -175,28 +231,34 @@ export default function Home() {
                 setShopOpen(data.value === 'true')
             }
         }
-        fetchShopStatus()
 
         // 2. Subscribe to Shop Status changes
-        // 2. Subscribe to Shop Status changes
-        const statusSubscription = supabase
-            .channel('home_shop_status')
-            .on('postgres_changes', {
-                event: '*',
-                schema: 'public',
-                table: 'store_settings'
-            }, (payload) => {
-                console.log('🔔 STORE SETTINGS UPDATE:', payload)
-                if (payload.new && payload.new.key === 'shop_open') {
-                    setShopOpen(payload.new.value === 'true')
-                }
-            })
-            .subscribe((status) => {
-                console.log('🔌 Store Status Subscription:', status)
-            })
+        let statusSubscription = null
+        const setupStoreSubscription = () => {
+            fetchShopStatus()
+            if (statusSubscription) supabase.removeChannel(statusSubscription)
+
+            statusSubscription = supabase
+                .channel('home_shop_status')
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'store_settings'
+                }, (payload) => {
+                    console.log('🔔 STORE SETTINGS UPDATE:', payload)
+                    if (payload.new && payload.new.key === 'shop_open') {
+                        setShopOpen(payload.new.value === 'true')
+                    }
+                })
+                .subscribe((status) => console.log('🔌 Store Status Subscription:', status))
+        }
+
+        setupStoreSubscription()
+        window.addEventListener('appResumed', setupStoreSubscription)
 
         return () => {
-            supabase.removeChannel(statusSubscription)
+            if (statusSubscription) supabase.removeChannel(statusSubscription)
+            window.removeEventListener('appResumed', setupStoreSubscription)
         }
     }, [])
 
@@ -213,27 +275,33 @@ export default function Home() {
             }
         }
 
-        fetchProducts()
+        let subscription = null
 
-        // Real-time subscription for instant updates
-        const subscription = supabase
-            .channel('public:products')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, (payload) => {
-                console.log('📦 PRODUCT UPDATE:', payload)
-                if (payload.eventType === 'INSERT') {
-                    setProducts(prev => [...prev, payload.new])
-                } else if (payload.eventType === 'UPDATE') {
-                    setProducts(prev => prev.map(p => p.id === payload.new.id ? payload.new : p))
-                } else if (payload.eventType === 'DELETE') {
-                    setProducts(prev => prev.filter(p => p.id !== payload.old.id))
-                }
-            })
-            .subscribe((status) => {
-                console.log('🔌 Product Subscription:', status)
-            })
+        const setupProductsSubscription = () => {
+            fetchProducts()
+            if (subscription) supabase.removeChannel(subscription)
+
+            subscription = supabase
+                .channel('public:products')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, (payload) => {
+                    console.log('📦 PRODUCT UPDATE:', payload)
+                    if (payload.eventType === 'INSERT') {
+                        setProducts(prev => [...prev, payload.new])
+                    } else if (payload.eventType === 'UPDATE') {
+                        setProducts(prev => prev.map(p => p.id === payload.new.id ? payload.new : p))
+                    } else if (payload.eventType === 'DELETE') {
+                        setProducts(prev => prev.filter(p => p.id !== payload.old.id))
+                    }
+                })
+                .subscribe((status) => console.log('🔌 Product Subscription:', status))
+        }
+
+        setupProductsSubscription()
+        window.addEventListener('appResumed', setupProductsSubscription)
 
         return () => {
-            supabase.removeChannel(subscription)
+            if (subscription) supabase.removeChannel(subscription)
+            window.removeEventListener('appResumed', setupProductsSubscription)
         }
     }, [])
 
@@ -309,9 +377,13 @@ export default function Home() {
                         <h1 className="text-xl font-black tracking-wide uppercase">
                             {STORE_NAME}
                         </h1>
-                        <div className="flex items-center gap-2 mt-1 opacity-90">
-                            <MapPin size={12} />
-                            <p className="text-xs font-medium">{STORE_LOCATION_TEXT}</p>
+                        <div
+                            className="flex items-center gap-2 mt-2 opacity-90 cursor-pointer hover:opacity-100 transition-opacity bg-white/10 px-3 py-1.5 rounded-full w-max"
+                            onClick={() => setShowAddressModal(true)}
+                        >
+                            <MapPin size={14} className="text-[#E0A75E]" />
+                            <p className="text-xs font-semibold truncate max-w-[200px]">{activeAddress}</p>
+                            <ChevronRight size={14} />
                         </div>
                         <div className="flex gap-2 mt-3">
                             <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border backdrop-blur-sm ${shopOpen ? 'bg-green-400/20 text-green-100 border-green-400/30' : 'bg-red-400/20 text-red-100 border-red-400/30'}`}>
@@ -533,8 +605,18 @@ export default function Home() {
 
                             <div className="pt-2 space-y-3">
                                 <a
-                                    href="https://www.dropbox.com/scl/fi/f8vpxoz12jfztn6brf8zz/MRN-Mulla-Kirana.apk?rlkey=xut6avgeej9zh9rvxs5opuqfn&st=2aplj0te&dl=1"
-                                    onClick={() => handleDismissPrompt()} // Hide prompt after clicking
+                                    onClick={async (e) => {
+                                        e.preventDefault()
+                                        handleDismissPrompt()
+                                        const url = "https://www.dropbox.com/scl/fi/f8vpxoz12jfztn6brf8zz/MRN-Mulla-Kirana.apk?rlkey=xut6avgeej9zh9rvxs5opuqfn&st=2aplj0te&dl=1"
+                                        if (Capacitor.isNativePlatform()) {
+                                            const { Browser } = await import('@capacitor/browser')
+                                            await Browser.open({ url })
+                                        } else {
+                                            window.open(url, '_blank')
+                                        }
+                                    }}
+                                    href="#"
                                     className="w-full flex items-center justify-center gap-2 bg-[#023430] text-white py-3.5 rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg hover:shadow-[#023430]/30"
                                 >
                                     <Download size={20} />
@@ -547,6 +629,89 @@ export default function Home() {
                                     Continue on Mobile Web
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ─── ADDRESS SELECTOR MODAL ─── */}
+            {showAddressModal && (
+                <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center animate-fadeIn">
+                    <div className="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-slideUp">
+                        <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                            <h3 className="font-bold text-lg text-gray-900 flex items-center gap-2">
+                                <MapPin size={18} className="text-[#023430]" /> Select Delivery Address
+                            </h3>
+                            <button onClick={() => setShowAddressModal(false)} className="p-2 bg-gray-100 rounded-full text-gray-500 hover:bg-gray-200">
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <div className="p-4 max-h-[60vh] overflow-y-auto bg-white">
+                            {!customerPhone ? (
+                                <div className="text-center py-8">
+                                    <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <LogIn size={28} />
+                                    </div>
+                                    <h4 className="font-bold text-gray-900 mb-2">Please Login</h4>
+                                    <p className="text-sm text-gray-500 mb-6 px-4">You need to enter your phone number during your first checkout to save addresses.</p>
+                                    <button
+                                        onClick={() => {
+                                            setShowAddressModal(false)
+                                            navigate('/checkout')
+                                        }}
+                                        className="bg-[#023430] text-white px-6 py-2.5 rounded-xl font-bold text-sm"
+                                    >
+                                        Go to Checkout
+                                    </button>
+                                </div>
+                            ) : savedAddresses.length > 0 ? (
+                                <div className="space-y-3">
+                                    <p className="text-sm font-semibold text-gray-600 mb-2">Your Saved Addresses</p>
+                                    {savedAddresses.map((addr, idx) => (
+                                        <div
+                                            key={idx}
+                                            onClick={() => handleSelectAddress(addr)}
+                                            className="p-4 border-2 border-gray-100 rounded-2xl cursor-pointer hover:border-[#023430] hover:bg-green-50/50 transition-all flex items-start gap-3"
+                                        >
+                                            <div className="mt-1 bg-gray-100 p-2 rounded-full text-gray-500">
+                                                <Map size={16} />
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-gray-900 text-sm">{addr.houseNo ? `${addr.houseNo}, ` : ''}{addr.area}</p>
+                                                {addr.location && <p className="text-xs text-gray-500 mt-1">📍 Location Saved</p>}
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    <div className="mt-4 pt-4 border-t border-gray-100 text-center">
+                                        <button
+                                            onClick={() => {
+                                                setShowAddressModal(false)
+                                                navigate('/checkout')
+                                            }}
+                                            className="text-sm font-bold text-[#023430] flex items-center justify-center gap-1 w-full p-2"
+                                        >
+                                            <Plus size={16} /> Add new address during checkout
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="text-center py-8">
+                                    <MapPin size={32} className="text-gray-300 mx-auto mb-3" />
+                                    <p className="font-semibold text-gray-800">No saved addresses</p>
+                                    <p className="text-sm text-gray-500 mb-4">Checkout once to automatically save your address.</p>
+                                    <button
+                                        onClick={() => {
+                                            setShowAddressModal(false)
+                                            navigate('/checkout')
+                                        }}
+                                        className="bg-[#023430] text-white px-6 py-2.5 rounded-xl font-bold text-sm"
+                                    >
+                                        Go to Checkout
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
