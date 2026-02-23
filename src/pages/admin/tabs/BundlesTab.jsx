@@ -129,7 +129,7 @@ export default function BundlesTab() {
 
             {/* Creation Form */}
             {isCreating && (
-                <div className="bg-white p-6 rounded-3xl shadow-sm border border-[#023430]/20 max-h-[75vh] flex flex-col overflow-hidden animate-slideUp">
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-[#023430]/20 flex flex-col animate-slideUp">
 
                     <div className="mb-4 shrink-0">
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Bundle Name</label>
@@ -144,7 +144,7 @@ export default function BundlesTab() {
 
                     {/* Selected Products Summary */}
                     {selectedProducts.length > 0 && (
-                        <div className="mb-4 p-3 bg-green-50 rounded-xl border border-green-200 shrink-0 max-h-[25vh] overflow-y-auto custom-scrollbar">
+                        <div className="mb-4 p-3 bg-green-50 rounded-xl border border-green-200 shrink-0 max-h-[150px] overflow-y-auto custom-scrollbar">
                             <h3 className="text-xs font-bold text-green-800 uppercase tracking-wider mb-2 sticky top-0 bg-green-50 z-10 pb-1">Selected Items ({selectedProducts.length})</h3>
                             <div className="flex flex-wrap gap-2">
                                 {selectedProducts.map(id => {
@@ -183,7 +183,7 @@ export default function BundlesTab() {
                         </div>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto min-h-[150px] border border-gray-200 rounded-xl p-2 mb-4 bg-gray-50">
+                    <div className="h-[350px] overflow-y-auto border border-gray-200 rounded-xl p-2 mb-4 bg-gray-50">
                         {filteredProducts.map(product => {
                             const isSelected = selectedProducts.includes(product.id)
                             return (
@@ -215,7 +215,7 @@ export default function BundlesTab() {
                         )}
                     </div>
 
-                    <div className="flex gap-3 justify-end shrink-0 pt-2 border-t border-gray-100">
+                    <div className="flex gap-3 justify-end shrink-0 pt-4 mt-2 border-t border-gray-100">
                         <button
                             onClick={() => {
                                 setIsCreating(false)
