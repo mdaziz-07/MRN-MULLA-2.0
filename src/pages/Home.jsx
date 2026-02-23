@@ -129,6 +129,7 @@ export default function Home() {
     const [scrolled, setScrolled] = useState(false)
     const scrolledRef = useRef(false)
     const [shopOpen, setShopOpen] = useState(true)
+    const [products, setProducts] = useState(PRODUCTS)
     const [showAppPrompt, setShowAppPrompt] = useState(false)
     const [showAddressModal, setShowAddressModal] = useState(false)
     const [savedAddresses, setSavedAddresses] = useState([])
