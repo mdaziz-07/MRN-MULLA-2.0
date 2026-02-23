@@ -4,7 +4,7 @@ android {
     namespace = "com.mrnmulla.store"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.mrnmulla.admin"
+        applicationId "com.mrnmulla.store"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

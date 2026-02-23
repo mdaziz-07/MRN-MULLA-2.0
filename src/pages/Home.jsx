@@ -382,7 +382,7 @@ export default function Home() {
                         href="https://www.dropbox.com/scl/fi/f8vpxoz12jfztn6brf8zz/MRN-Mulla-Kirana.apk?rlkey=xut6avgeej9zh9rvxs5opuqfn&st=2aplj0te&dl=1"
                         className="bg-[#023430] text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-sm active:scale-95 transition-transform"
                     >
-                        Download 🚀
+                        Download
                     </a>
                 </div>
             )}
