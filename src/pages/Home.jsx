@@ -202,7 +202,8 @@ export default function Home() {
                 sessionStorage.setItem('redirectAttempted', 'true')
                 // Try to open the app via intent.
                 // If it fails, the browser ignores it and we proceed to show the prompt.
-                window.location.href = "intent://#Intent;scheme=mrnmulla;package=com.mrnmulla.store;end"
+                // We intentionally omit `package=` so Android won't crash-redirect to the Google Play Store!
+                window.location.href = "intent://#Intent;scheme=mrnmulla;S.browser_fallback_url=;end"
             }
 
             // Show prompt if not dismissed

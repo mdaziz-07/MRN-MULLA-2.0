@@ -57,7 +57,7 @@ function App() {
                     .single()
 
                 if (data && data.value) {
-                    const latestVersion = parseInt(data.value, 10)
+                    const latestVersion = parseFloat(data.value)
                     if (latestVersion > APP_BUILD_VERSION) {
                         setUpdateRequired(true)
                     }
