@@ -129,10 +129,10 @@ export default function BundlesTab() {
 
             {/* Creation Form */}
             {isCreating && (
-                <div className="bg-white p-6 rounded-3xl shadow-sm border border-[#023430]/20 animate-slideUp">
-                    <h2 className="text-lg font-bold text-gray-900 mb-4">Create New Bundle</h2>
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-[#023430]/20 max-h-[75vh] flex flex-col animate-slideUp">
+                    <h2 className="text-lg font-bold text-gray-900 mb-4 shrink-0">Create New Bundle</h2>
 
-                    <div className="mb-4">
+                    <div className="mb-4 shrink-0">
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Bundle Name</label>
                         <input
                             type="text"
@@ -162,7 +162,7 @@ export default function BundlesTab() {
                         </div>
                     )}
 
-                    <div className="mb-3 flex flex-col sm:flex-row gap-2 justify-between items-start sm:items-center">
+                    <div className="mb-3 flex flex-col sm:flex-row gap-2 justify-between items-start sm:items-center shrink-0">
                         <label className="block text-sm font-semibold text-gray-700">
                             Select Products
                         </label>
@@ -178,7 +178,7 @@ export default function BundlesTab() {
                         </div>
                     </div>
 
-                    <div className="h-48 md:h-64 overflow-y-auto border border-gray-200 rounded-xl p-2 mb-4 bg-gray-50">
+                    <div className="flex-1 overflow-y-auto min-h-[150px] border border-gray-200 rounded-xl p-2 mb-4 bg-gray-50">
                         {filteredProducts.map(product => {
                             const isSelected = selectedProducts.includes(product.id)
                             return (
@@ -210,7 +210,7 @@ export default function BundlesTab() {
                         )}
                     </div>
 
-                    <div className="flex gap-3 justify-end">
+                    <div className="flex gap-3 justify-end shrink-0 pt-2 border-t border-gray-100">
                         <button
                             onClick={() => {
                                 setIsCreating(false)

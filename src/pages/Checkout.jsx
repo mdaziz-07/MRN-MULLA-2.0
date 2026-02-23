@@ -115,6 +115,32 @@ export default function Checkout() {
     const [deliveryCharge, setDeliveryCharge] = useState(0)
     const [minOrderForFreeDelivery, setMinOrderForFreeDelivery] = useState(0)
 
+    // Load store delivery settings
+    useEffect(() => {
+        const fetchDeliverySettings = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('store_settings')
+                    .select('key, value')
+                    .in('key', ['delivery_fee', 'free_delivery_min_order'])
+
+                if (data) {
+                    let fee = 0
+                    let minOrder = 0
+                    data.forEach(setting => {
+                        if (setting.key === 'delivery_fee') fee = Number(setting.value)
+                        if (setting.key === 'free_delivery_min_order') minOrder = Number(setting.value)
+                    })
+                    setDeliveryCharge(fee)
+                    setMinOrderForFreeDelivery(minOrder)
+                }
+            } catch (err) {
+                console.error('Failed to load delivery settings', err)
+            }
+        }
+        fetchDeliverySettings()
+    }, [])
+
     // Load bundles from Supabase
     useEffect(() => {
         const fetchBundles = async () => {
@@ -167,7 +193,10 @@ export default function Checkout() {
 
     // Calculate totals
     const subtotal = items.reduce((sum, item) => sum + (item.price * item.qty), 0)
-    const totalAmount = subtotal + deliveryCharge
+
+    // Delivery Logic: Apply charge if subtotal is below the minimum free threshold
+    const appliedDeliveryCharge = (minOrderForFreeDelivery > 0 && subtotal >= minOrderForFreeDelivery) ? 0 : deliveryCharge
+    const totalAmount = subtotal + appliedDeliveryCharge
 
     const [mapCenter, setMapCenter] = useState(
         initialLocation
@@ -213,10 +242,14 @@ export default function Checkout() {
 
                 if (data && data.addresses && data.addresses.length > 0) {
                     setSavedAddresses(data.addresses)
+
                     // If they came with an activeAddress from Home, try to find and auto-select it
-                    const activeIndex = data.addresses.findIndex(
-                        a => a.houseNo === initialHouseNo && a.area === initialArea
-                    )
+                    // Relax the exact match to just look at area if houseNo is empty
+                    const activeIndex = data.addresses.findIndex(a => {
+                        const sameArea = a.area === initialArea
+                        const sameHouse = initialHouseNo ? a.houseNo === initialHouseNo : true
+                        return sameArea && sameHouse
+                    })
 
                     if (activeIndex >= 0) {
                         handleSelectSavedAddress(activeIndex, data.addresses)
@@ -224,8 +257,7 @@ export default function Checkout() {
                         // fallback to newest address if they have absolutely nothing set
                         handleSelectSavedAddress(data.addresses.length - 1, data.addresses)
                     } else {
-                        // They have customer_data locally but maybe it wasn't saved in cloud yet
-                        // Just keep current form state, mark as new address adding layout if it doesn't strictly match DB
+                        // Keep current form state, mark as new address
                         setIsAddingNewAddress(true)
                     }
                 } else {
@@ -240,9 +272,9 @@ export default function Checkout() {
         setSelectedAddressIndex(index)
         setIsAddingNewAddress(false)
         const addr = addressesArr[index]
-        setHouseNo(addr.houseNo)
-        setArea(addr.area)
-        handleLocationUpdate(addr.location)
+        setHouseNo(addr.houseNo || '')
+        setArea(addr.area || '')
+        if (addr.location) handleLocationUpdate(addr.location)
     }
 
     const handleSelectNewAddressMode = () => {
@@ -496,7 +528,7 @@ export default function Checkout() {
             }))
 
             const { data: orderData, error: orderError } = await supabase.functions.invoke('create-razorpay-order', {
-                body: { cart: secureCartPayload, deliveryFee: deliveryCharge }
+                body: { cart: secureCartPayload, deliveryFee: appliedDeliveryCharge }
             })
 
             if (orderError || !orderData?.success) {
@@ -869,11 +901,11 @@ export default function Checkout() {
                             </div>
                             <div className="flex justify-between text-gray-600">
                                 <span>Delivery Charge</span>
-                                <span className={deliveryCharge === 0 ? 'text-green-600 font-bold' : ''}>
-                                    {deliveryCharge === 0 ? 'Free' : `₹${deliveryCharge}`}
+                                <span className={appliedDeliveryCharge === 0 ? 'text-green-600 font-bold' : ''}>
+                                    {appliedDeliveryCharge === 0 ? 'Free' : `₹${appliedDeliveryCharge}`}
                                 </span>
                             </div>
-                            {deliveryCharge > 0 && (
+                            {appliedDeliveryCharge > 0 && minOrderForFreeDelivery > 0 && (
                                 <p className="text-xs text-orange-500 text-right">
                                     Add ₹{minOrderForFreeDelivery - subtotal} more for free delivery
                                 </p>

@@ -66,6 +66,7 @@ export default function TrackOrder() {
                 if (error) throw error
                 setOrder(data)
                 setCurrentStatusIndex(ORDER_STATUSES.indexOf(data.status))
+                setViewMode('single') // Auto open
             } catch (err) {
                 console.error('Error fetching order:', err)
                 setOrder(null)
@@ -126,20 +127,34 @@ export default function TrackOrder() {
     useEffect(() => {
         if (!orderId) return
 
-        const channel = supabase
-            .channel(`order-${orderId}`)
-            .on('postgres_changes', {
-                event: 'UPDATE',
-                schema: 'public',
-                table: 'orders',
-                filter: `id=eq.${orderId}`,
-            }, (payload) => {
-                setOrder(payload.new)
-                setCurrentStatusIndex(ORDER_STATUSES.indexOf(payload.new.status))
-            })
-            .subscribe()
+        let channel = null
 
-        return () => channel.unsubscribe()
+        const setupSubscription = () => {
+            if (channel) supabase.removeChannel(channel)
+
+            channel = supabase
+                .channel(`order-${orderId}`)
+                .on('postgres_changes', {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'orders',
+                    filter: `id=eq.${orderId}`,
+                }, (payload) => {
+                    setOrder(payload.new)
+                    setCurrentStatusIndex(ORDER_STATUSES.indexOf(payload.new.status))
+                })
+                .subscribe()
+        }
+
+        setupSubscription()
+
+        // Native App Resume Listener
+        window.addEventListener('appResumed', setupSubscription)
+
+        return () => {
+            if (channel) supabase.removeChannel(channel)
+            window.removeEventListener('appResumed', setupSubscription)
+        }
     }, [orderId])
 
     const formatDate = (dateStr) => {
