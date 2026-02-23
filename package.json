@@ -8,8 +8,8 @@
     "build": "vite build",
     "build:customer": "cross-env VITE_APP_MODE=customer vite build",
     "build:admin": "cross-env VITE_APP_MODE=admin vite build",
-    "build:apk:customer": "npm run build:customer && npx cap sync android",
-    "build:apk:admin": "npm run build:admin && npx cap sync android",
+    "build:apk:customer": "node scripts/switch-app.cjs customer && npm run update-icons:customer && npm run build:customer && npx cap sync android",
+    "build:apk:admin": "node scripts/switch-app.cjs admin && npm run update-icons:admin && npm run build:admin && npx cap sync android",
     "update-icons:customer": "npx @capacitor/assets generate --android --assetPath assets/customer --iconBackgroundColor #ffffff --splashBackgroundColor #ffffff",
     "update-icons:admin": "npx @capacitor/assets generate --android --assetPath assets/admin --iconBackgroundColor #ffffff --splashBackgroundColor #ffffff",
     "preview": "vite preview"

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">MRN Mulla Kirana</string>
-    <string name="title_activity_main">MRN Mulla Kirana</string>
-    <string name="package_name">com.mrnmulla.store</string>
-    <string name="custom_url_scheme">com.mrnmulla.store</string>
+    <string name="app_name">MRN Admin</string>
+    <string name="title_activity_main">MRN Admin</string>
+    <string name="package_name">com.mrnmulla.admin</string>
+    <string name="custom_url_scheme">com.mrnmulla.admin</string>
 </resources>
