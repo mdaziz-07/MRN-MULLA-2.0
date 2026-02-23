@@ -130,7 +130,6 @@ export default function BundlesTab() {
             {/* Creation Form */}
             {isCreating && (
                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-[#023430]/20 max-h-[75vh] flex flex-col overflow-hidden animate-slideUp">
-                    <h2 className="text-lg font-bold text-gray-900 mb-4 shrink-0">Create New Bundle</h2>
 
                     <div className="mb-4 shrink-0">
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Bundle Name</label>

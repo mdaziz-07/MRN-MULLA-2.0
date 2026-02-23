@@ -122,14 +122,14 @@ export default function Checkout() {
                 const { data, error } = await supabase
                     .from('store_settings')
                     .select('key, value')
-                    .in('key', ['delivery_fee', 'free_delivery_min_order'])
+                    .in('key', ['delivery_charge', 'delivery_min_amount'])
 
                 if (data) {
                     let fee = 0
                     let minOrder = 0
                     data.forEach(setting => {
-                        if (setting.key === 'delivery_fee') fee = Number(setting.value)
-                        if (setting.key === 'free_delivery_min_order') minOrder = Number(setting.value)
+                        if (setting.key === 'delivery_charge') fee = Number(setting.value)
+                        if (setting.key === 'delivery_min_amount') minOrder = Number(setting.value)
                     })
                     setDeliveryCharge(fee)
                     setMinOrderForFreeDelivery(minOrder)
