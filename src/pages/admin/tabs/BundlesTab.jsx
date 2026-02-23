@@ -129,7 +129,7 @@ export default function BundlesTab() {
 
             {/* Creation Form */}
             {isCreating && (
-                <div className="bg-white p-6 rounded-3xl shadow-sm border border-[#023430]/20 max-h-[75vh] flex flex-col animate-slideUp">
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-[#023430]/20 max-h-[75vh] flex flex-col overflow-hidden animate-slideUp">
                     <h2 className="text-lg font-bold text-gray-900 mb-4 shrink-0">Create New Bundle</h2>
 
                     <div className="mb-4 shrink-0">
@@ -145,8 +145,8 @@ export default function BundlesTab() {
 
                     {/* Selected Products Summary */}
                     {selectedProducts.length > 0 && (
-                        <div className="mb-4 p-3 bg-green-50 rounded-xl border border-green-200 shrink-0">
-                            <h3 className="text-xs font-bold text-green-800 uppercase tracking-wider mb-2">Selected Items ({selectedProducts.length})</h3>
+                        <div className="mb-4 p-3 bg-green-50 rounded-xl border border-green-200 shrink-0 max-h-[25vh] overflow-y-auto custom-scrollbar">
+                            <h3 className="text-xs font-bold text-green-800 uppercase tracking-wider mb-2 sticky top-0 bg-green-50 z-10 pb-1">Selected Items ({selectedProducts.length})</h3>
                             <div className="flex flex-wrap gap-2">
                                 {selectedProducts.map(id => {
                                     const prod = allProducts.find(p => p.id === id)

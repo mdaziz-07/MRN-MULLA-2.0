@@ -1,5 +1,5 @@
 {
-  "appId": "com.mrnmulla.store",
-  "appName": "MRN Mulla Kirana",
+  "appId": "com.mrnmulla.admin",
+  "appName": "MRN Admin",
   "webDir": "dist"
 }
