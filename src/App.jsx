@@ -13,7 +13,7 @@ import { supabase } from './lib/supabase'
 const APP_MODE = import.meta.env.VITE_APP_MODE || 'customer'
 
 // Current build version of the Customer App. Increase when publishing new APKs.
-const APP_BUILD_VERSION = 1
+const APP_BUILD_VERSION = 1.2
 
 // Lazy loaded pages
 const Home = lazy(() => import('./pages/Home'))

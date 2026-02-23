@@ -430,7 +430,7 @@ export default function Home() {
             </div>
 
             {/* ─── SEARCH BAR — sticky with safe-area header protector ─── */}
-            <div className={`sticky top-0 z-50 px-4 pb-3 pt-2 bg-[#023430] rounded-b-2xl ${scrolled ? 'shadow-lg' : 'shadow-md'}`}>
+            <div className={`sticky top-0 z-50 px-4 pb-3 transition-all duration-300 bg-[#023430] rounded-b-2xl ${scrolled ? 'pt-[calc(env(safe-area-inset-top)+0.75rem)] shadow-lg' : 'pt-2 shadow-md'}`}>
                 <div className="relative">
                     <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
