@@ -186,7 +186,7 @@ function App() {
                         <a
                             onClick={async (e) => {
                                 e.preventDefault()
-                                const url = "https://www.dropbox.com/scl/fi/f8vpxoz12jfztn6brf8zz/MRN-Mulla-Kirana.apk?rlkey=xut6avgeej9zh9rvxs5opuqfn&st=2aplj0te&dl=1"
+                                const url = "https://github.com/mdaziz-07/MRN-Mulla-Kirana-APK/releases/latest/download/MRN.Mulla.Kirana.apk"
                                 if (Capacitor.isNativePlatform()) {
                                     const { Browser } = await import('@capacitor/browser')
                                     await Browser.open({ url })
