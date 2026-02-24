@@ -18,7 +18,12 @@ export default function PrintRequestsTab() {
             })
             .subscribe()
 
-        return () => subscription.unsubscribe()
+        const interval = setInterval(fetchRequests, 3000)
+
+        return () => {
+            subscription.unsubscribe()
+            clearInterval(interval)
+        }
     }, [])
 
     const fetchRequests = async () => {

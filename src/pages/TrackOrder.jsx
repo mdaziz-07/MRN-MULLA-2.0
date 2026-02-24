@@ -76,17 +76,30 @@ export default function TrackOrder() {
         }
 
         fetchOrder()
+        const interval = setInterval(fetchOrder, 3000)
+        return () => clearInterval(interval)
     }, [orderId])
 
     // Fetch orders when mobile is available
     useEffect(() => {
         if (!orderId && loggedInMobile) {
-            fetchOrdersByMobile(loggedInMobile)
+            const fetchOrders = () => fetchOrdersByMobile(loggedInMobile)
+            fetchOrders()
+
+            // 3-second automatic refresh
+            const interval = setInterval(fetchOrders, 3000)
+
+            // Re-fetch when the app wakes up from background
+            window.addEventListener('appResumed', fetchOrders)
+
+            return () => {
+                clearInterval(interval)
+                window.removeEventListener('appResumed', fetchOrders)
+            }
         }
     }, [orderId, loggedInMobile])
 
     const fetchOrdersByMobile = async (mobile) => {
-        setLoading(true)
         try {
             const { data, error } = await supabase
                 .from('orders')

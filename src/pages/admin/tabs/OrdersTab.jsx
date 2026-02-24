@@ -43,6 +43,56 @@ function playNotificationSound() {
     }
 }
 
+
+// Dynamic cart item to pull latest image if historic JSON falls back
+function OrderCartItem({ item }) {
+    const [imageUrl, setImageUrl] = useState(item.image_url)
+
+    useEffect(() => {
+        // Only run fetch if the static JSON has no image, or if we want to force-check
+        // Because of the prior image_url wipe, many JSON items have `""`.
+        if (!item.image_url && item.id) {
+            supabase
+                .from('products')
+                .select('image_url')
+                .eq('id', item.id)
+                .single()
+                .then(({ data }) => {
+                    if (data?.image_url) setImageUrl(data.image_url)
+                })
+        }
+    }, [item])
+
+    return (
+        <div className="flex items-center gap-3">
+            <div className="w-11 h-11 bg-gray-50 rounded-lg flex items-center justify-center shrink-0 border border-gray-100 overflow-hidden p-0.5">
+                {imageUrl ? (
+                    <img
+                        src={imageUrl}
+                        alt={item.name}
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                            e.target.onerror = null
+                            e.target.style.display = 'none'
+                            e.target.parentElement.innerHTML = `<span class="text-gray-300 text-base font-bold">${item.name?.charAt(0) || '?'}</span>`
+                        }}
+                    />
+                ) : (
+                    <span className="text-gray-300 text-base font-bold">{item.name?.charAt(0) || '?'}</span>
+                )}
+            </div>
+            <div className="min-w-0 flex-1">
+                <p className="font-bold text-sm text-gray-900 truncate">{item.name}</p>
+                <p className="text-xs text-gray-500">{item.pack_size} {item.unit}</p>
+            </div>
+            <div className="text-right shrink-0 ml-2">
+                <p className="font-bold text-sm">x{item.qty}</p>
+                <p className="text-xs text-gray-500">₹{item.price * item.qty}</p>
+            </div>
+        </div>
+    )
+}
+
 export default function OrdersTab() {
     const [orders, setOrders] = useState([])
     const [loading, setLoading] = useState(true)
@@ -141,7 +191,12 @@ export default function OrdersTab() {
             Notification.requestPermission()
         }
 
-        return () => channel.unsubscribe()
+        const interval = setInterval(fetchOrders, 3000)
+
+        return () => {
+            channel.unsubscribe()
+            clearInterval(interval)
+        }
     }, [])
 
     // Update order status
@@ -435,32 +490,7 @@ export default function OrdersTab() {
                             <h4 className="font-bold border-b pb-2 mb-3 text-sm text-gray-900">Items Ordered</h4>
                             <div className="space-y-3">
                                 {selectedOrder.cart_json?.map((item, i) => (
-                                    <div key={i} className="flex items-center gap-3">
-                                        <div className="w-11 h-11 bg-gray-50 rounded-lg flex items-center justify-center shrink-0 border border-gray-100 overflow-hidden p-0.5">
-                                            {item.image_url ? (
-                                                <img
-                                                    src={item.image_url}
-                                                    alt={item.name}
-                                                    className="w-full h-full object-contain"
-                                                    onError={(e) => {
-                                                        e.target.onerror = null
-                                                        e.target.style.display = 'none'
-                                                        e.target.parentElement.innerHTML = `<span class="text-gray-300 text-base font-bold">${item.name?.charAt(0) || '?'}</span>`
-                                                    }}
-                                                />
-                                            ) : (
-                                                <span className="text-gray-300 text-base font-bold">{item.name?.charAt(0) || '?'}</span>
-                                            )}
-                                        </div>
-                                        <div className="min-w-0 flex-1">
-                                            <p className="font-bold text-sm text-gray-900 truncate">{item.name}</p>
-                                            <p className="text-xs text-gray-500">{item.pack_size} {item.unit}</p>
-                                        </div>
-                                        <div className="text-right shrink-0 ml-2">
-                                            <p className="font-bold text-sm">x{item.qty}</p>
-                                            <p className="text-xs text-gray-500">₹{item.price * item.qty}</p>
-                                        </div>
-                                    </div>
+                                    <OrderCartItem key={i} item={item} />
                                 ))}
                             </div>
 
