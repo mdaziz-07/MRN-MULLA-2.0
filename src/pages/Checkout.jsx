@@ -468,11 +468,14 @@ export default function Checkout() {
             }
             const updatedAddresses = [...savedAddresses, newAddress]
 
-            // Fire and forget updating the customers table
+            // We must upsert the customer to ensure the row exists and the addresses are merged
             supabase
                 .from('customers')
-                .update({ addresses: updatedAddresses })
-                .eq('phone', phone)
+                .upsert({
+                    phone: phone,
+                    name: name.trim(),
+                    addresses: updatedAddresses
+                }, { onConflict: 'phone' })
                 .then(({ error: updateErr }) => {
                     if (updateErr) console.error("Could not save new address to address book", updateErr)
                 })
