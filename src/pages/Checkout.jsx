@@ -862,8 +862,12 @@ export default function Checkout() {
                                 <img
                                     src={item.image_url}
                                     alt={item.name}
-                                    className="w-12 h-12 object-contain bg-gray-50 rounded-lg p-1"
-                                    onError={(e) => { e.target.onerror = null; e.target.src = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'><rect fill='%23f5f5f5' width='60' height='60' rx='8'/><text x='30' y='35' text-anchor='middle' fill='%23999' font-size='14'>${encodeURIComponent(item.name.charAt(0))}</text></svg>` }}
+                                    loading="lazy"
+                                    decoding="async"
+                                    className="w-12 h-12 object-contain bg-gray-100 rounded-lg p-1 transition-opacity duration-300"
+                                    onLoad={(e) => { e.target.style.opacity = 1 }}
+                                    style={{ opacity: 0 }}
+                                    onError={(e) => { e.target.onerror = null; e.target.style.opacity = 1; e.target.src = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'><rect fill='%23f5f5f5' width='60' height='60' rx='8'/><text x='30' y='35' text-anchor='middle' fill='%23999' font-size='14'>${encodeURIComponent(item.name.charAt(0))}</text></svg>` }}
                                 />
                                 <div className="flex-1 min-w-0">
                                     <h3 className="text-sm font-semibold text-gray-900 truncate">{item.name}</h3>

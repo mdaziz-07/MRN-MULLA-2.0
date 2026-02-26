@@ -382,7 +382,11 @@ export default function TrackOrder() {
                                                         <img
                                                             src={item.image_url}
                                                             alt={item.name}
-                                                            className="w-full h-full object-contain"
+                                                            loading="lazy"
+                                                            decoding="async"
+                                                            className="w-full h-full object-contain transition-opacity duration-300"
+                                                            style={{ opacity: 0 }}
+                                                            onLoad={(e) => { e.target.style.opacity = 1 }}
                                                             onError={(e) => {
                                                                 e.target.onerror = null
                                                                 e.target.style.display = 'none'
@@ -591,7 +595,7 @@ export default function TrackOrder() {
                         <div key={i} className="flex items-center gap-3">
                             <div className="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center shrink-0 border border-gray-100 overflow-hidden p-1">
                                 {item.image_url ? (
-                                    <img src={item.image_url} alt={item.name} className="w-full h-full object-contain" />
+                                    <img src={item.image_url} alt={item.name} loading="lazy" decoding="async" className="w-full h-full object-contain transition-opacity duration-300" style={{ opacity: 0 }} onLoad={(e) => { e.target.style.opacity = 1 }} />
                                 ) : (
                                     <span className="text-gray-300 text-sm font-bold">{item.name.charAt(0)}</span>
                                 )}
