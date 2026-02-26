@@ -16,8 +16,9 @@ export const STORE_NAME = 'MRN MULLA KIRANA'
 export const STORE_LOCATION_TEXT = 'Nalwar Station, Karnataka'
 export const DELIVERY_RADIUS_KM = 5
 
-// ImgBB API Key
-export const IMGBB_API_KEY = import.meta.env.VITE_IMGBB_API_KEY || ''
+// Cloudinary
+export const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dvg5a6dl5'
+export const CLOUDINARY_UPLOAD_PRESET = 'mrn_products'
 
 // Razorpay Key
 export const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || ''

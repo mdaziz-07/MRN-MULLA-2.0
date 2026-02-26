@@ -3,7 +3,7 @@ import {
     Plus, Edit, Trash2, Search,
     X, Upload, Save, ScanBarcode
 } from 'lucide-react'
-import { supabase, IMGBB_API_KEY } from '../../../lib/supabase'
+import { supabase, CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from '../../../lib/supabase'
 import { PRODUCTS, CATEGORIES } from '../../../data/products'
 import { toast } from 'sonner'
 import { BarcodeScanner } from '@capacitor-mlkit/barcode-scanning'
@@ -340,34 +340,29 @@ function ProductFormModal({ product, categories, defaultCategory, scannedBarcode
         if (!file) return
         e.target.value = '' // reset input
 
-        if (IMGBB_API_KEY) {
-            setUploading(true)
-            try {
-                const formData = new FormData()
-                formData.append('image', file)
-                const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-                    method: 'POST',
-                    body: formData,
-                })
-                const data = await res.json()
-                if (data.data?.url) {
-                    setImages(prev => [...prev, data.data.url])
-                    toast.success('Image uploaded!')
-                } else {
-                    toast.error('Upload failed: ' + (data.error?.message || 'Unknown error'))
-                }
-            } catch (err) {
-                toast.error('Image upload failed')
-            } finally {
-                setUploading(false)
+        setUploading(true)
+        try {
+            const formData = new FormData()
+            formData.append('file', file)
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
+
+            const res = await fetch(
+                `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+                { method: 'POST', body: formData }
+            )
+            const data = await res.json()
+
+            if (data.secure_url) {
+                setImages(prev => [...prev, data.secure_url])
+                toast.success('Image uploaded!')
+            } else {
+                toast.error('Upload failed: ' + (data.error?.message || 'Unknown error'))
             }
-        } else {
-            const reader = new FileReader()
-            reader.onload = (ev) => {
-                setImages(prev => [...prev, ev.target.result])
-                toast.info('Set VITE_IMGBB_API_KEY for cloud uploads')
-            }
-            reader.readAsDataURL(file)
+        } catch (err) {
+            console.error('Cloudinary upload error:', err)
+            toast.error('Image upload failed. Check your internet connection.')
+        } finally {
+            setUploading(false)
         }
     }
 
