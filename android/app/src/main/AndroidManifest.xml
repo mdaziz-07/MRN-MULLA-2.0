@@ -31,6 +31,14 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <!-- Deep-link handler for Razorpay Web Checkout Bypass -->
+            <intent-filter android:autoVerify="false">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="mrnmulla" android:host="payment" />
+            </intent-filter>
         </activity>
 
         <provider

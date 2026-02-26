@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MRN Mulla Kirana — Secure Payment</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #023430;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            padding: 40px 28px;
+            text-align: center;
+            max-width: 340px;
+            width: 90%;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .sub {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.55);
+            margin-bottom: 24px;
+        }
+
+        .amount {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #4ade80;
+            margin-bottom: 8px;
+            letter-spacing: -1px;
+        }
+
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid rgba(255, 255, 255, 0.15);
+            border-top-color: #4ade80;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 24px auto 0;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .status {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 12px;
+        }
+
+        .btn {
+            margin-top: 24px;
+            padding: 14px 28px;
+            background: #00C853;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-cancel {
+            margin-top: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        #error-box {
+            display: none;
+        }
+
+        #loading-box {
+            display: block;
+        }
+
+        #pay-box {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="logo">🛒</div>
+        <h1>MRN Mulla Kirana</h1>
+        <p class="sub">Secure Online Payment</p>
+
+        <!-- Loading state -->
+        <div id="loading-box">
+            <div class="amount" id="amount-display">₹—</div>
+            <div class="spinner"></div>
+            <p class="status">Opening payment window…</p>
+        </div>
+
+        <!-- If Razorpay auto-open fails, show manual button -->
+        <div id="pay-box">
+            <div class="amount" id="amount-display2">₹—</div>
+            <button class="btn" id="open-btn" onclick="openRazorpay()">Pay Now</button>
+            <button class="btn btn-cancel" onclick="cancel()">Cancel</button>
+        </div>
+
+        <!-- Error state -->
+        <div id="error-box">
+            <p style="color:#ff6b6b; margin-bottom:16px; font-size:0.9rem;" id="error-msg">Something went wrong.</p>
+            <button class="btn btn-cancel" onclick="cancel()">Go Back</button>
+        </div>
+    </div>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        // ── Read params from URL ──────────────────────────────────────────────────
+        const params = new URLSearchParams(window.location.search);
+        const orderId = params.get('order_id');
+        const amount = parseInt(params.get('amount') || '0', 10); // in PAISE
+        const name = decodeURIComponent(params.get('name') || 'Customer');
+        const phone = decodeURIComponent(params.get('phone') || '');
+        const key = decodeURIComponent(params.get('key') || '');
+
+        // Display amount in rupees
+        const rupees = (amount / 100).toFixed(2);
+        document.getElementById('amount-display').textContent = '₹' + rupees;
+        document.getElementById('amount-display2').textContent = '₹' + rupees;
+
+        // ── Deep-link back to app ─────────────────────────────────────────────────
+        function sendToApp(status, paymentId, rzpOrderId, signature) {
+            let url = 'mrnmulla://payment?status=' + status;
+            if (paymentId) url += '&payment_id=' + encodeURIComponent(paymentId);
+            if (rzpOrderId) url += '&order_id=' + encodeURIComponent(rzpOrderId);
+            if (signature) url += '&signature=' + encodeURIComponent(signature);
+            // Try deep-link; fallback to window.close()
+            window.location.href = url;
+            setTimeout(() => { try { window.close(); } catch (e) { } }, 800);
+        }
+
+        function cancel() {
+            sendToApp('cancelled');
+        }
+
+        // ── Open Razorpay ─────────────────────────────────────────────────────────
+        function openRazorpay() {
+            if (!orderId || !key) {
+                showError('Missing payment details. Please go back and try again.');
+                return;
+            }
+
+            const options = {
+                key: key,
+                amount: amount,      // In paise — display only; actual amount is locked server-side
+                currency: 'INR',
+                name: 'MRN Mulla Kirana',
+                description: 'Grocery Order',
+                order_id: orderId,
+
+                prefill: {
+                    name: name,
+                    contact: phone,
+                },
+
+                config: {
+                    display: {
+                        blocks: {
+                            upi: {
+                                name: 'Pay via UPI Apps',
+                                instruments: [{ method: 'upi' }]
+                            }
+                        },
+                        sequence: ['block.upi'],
+                        preferences: { show_default_blocks: true }
+                    }
+                },
+
+                theme: { color: '#023430' },
+
+                handler: function (response) {
+                    // Payment SUCCESS — send back to app with payment details
+                    sendToApp(
+                        'success',
+                        response.razorpay_payment_id,
+                        response.razorpay_order_id,
+                        response.razorpay_signature
+                    );
+                },
+
+                modal: {
+                    ondismiss: function () {
+                        // User closed the modal without paying
+                        cancel();
+                    }
+                }
+            };
+
+            try {
+                const rzp = new Razorpay(options);
+                rzp.on('payment.failed', function (resp) {
+                    sendToApp('failed');
+                });
+                rzp.open();
+                // Hide loading, show pay button as fallback
+                document.getElementById('loading-box').style.display = 'none';
+                document.getElementById('pay-box').style.display = 'block';
+            } catch (e) {
+                showError('Could not load payment gateway. Please check your internet and try again.');
+            }
+        }
+
+        function showError(msg) {
+            document.getElementById('loading-box').style.display = 'none';
+            document.getElementById('pay-box').style.display = 'none';
+            document.getElementById('error-box').style.display = 'block';
+            document.getElementById('error-msg').textContent = msg;
+        }
+
+        // ── Auto-open on load ─────────────────────────────────────────────────────
+        window.addEventListener('load', function () {
+            if (!orderId || !key) {
+                showError('Invalid payment link. Please go back to the app and try again.');
+                return;
+            }
+            // Small delay to let Razorpay SDK fully initialize
+            setTimeout(openRazorpay, 600);
+        });
+    </script>
+</body>
+
+</html>
