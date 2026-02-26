@@ -435,7 +435,7 @@ export default function Home() {
                     <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
                         type="text"
-                        placeholder="Search products..."
+                        placeholder="Search For Atta, Dal, Milk..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full bg-white text-gray-800 rounded-full pl-10 pr-9 py-2.5 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#E0A75E] shadow-sm"

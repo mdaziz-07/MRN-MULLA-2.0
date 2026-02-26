@@ -475,7 +475,7 @@ export default function TrackOrder() {
 
                 <button
                     onClick={async () => {
-                        const trackUrl = `${window.location.origin}/track/${orderId}`;
+                        const trackUrl = `https://mrnmullakiranashop.vercel.app/track/${orderId}`;
                         const shareData = {
                             title: `Order #${orderId}`,
                             text: `Track my order from ${STORE_NAME}`,
