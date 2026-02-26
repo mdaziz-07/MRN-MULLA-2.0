@@ -1,7 +1,11 @@
 /**
- * MRN Mulla Kirana – Kiko Product Importer
+ * MRN Mulla Kirana – Kiko Product Importer (Name + Price only)
+ * 
+ * Step 1: Deletes ALL existing products
+ * Step 2: Fetches all 305 products from Kiko (fetches pages until no more items)
+ * Step 3: Inserts name + price into Supabase
+ *
  * Run: node scripts/import-kiko-products.mjs
- * (Uses @supabase/supabase-js which is already installed in node_modules)
  */
 
 import { createClient } from '../node_modules/@supabase/supabase-js/dist/index.mjs'
@@ -10,91 +14,105 @@ const SUPABASE_URL = 'https://vkbhvzgcnagxyhoiuaoj.supabase.co'
 const SUPABASE_KEY = 'sb_publishable_dPTk3YsvJLI-xcgrhps_RA_zWBYl9K9'
 const KIKO_SELLER_ID = '69298771bc54dbb080aaddbe'
 const KIKO_API = 'https://ondc.kiko.live/ondc-seller/catalogues-group-by-categories'
-const TOTAL_PAGES = 4
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
-// Kiko subCategoryId → app category
-const CATEGORY_MAP = {
-    'Atta, Flours and Sooji': 'Atta & Flour',
-    'Cereals and Breakfast': 'Atta & Flour',
-    'Cooking and Baking Needs': 'Atta & Flour',
-    'Rice and Rice Products': 'Rice & Dal',
-    'Dals and Pulses': 'Rice & Dal',
-    'Salt, Sugar and Jaggery': 'Rice & Dal',
-    'Eggs, Meat & Fish': 'Rice & Dal',
-    'Oil & Ghee': 'Cooking Oil & Ghee',
-    'Masala & Seasoning': 'Spices & Masala',
-    'Sauces, Spreads and Dips': 'Spices & Masala',
-    'Pickles and Chutney': 'Spices & Masala',
-    'Tea and Coffee': 'Tea & Coffee',
-    'Chocolates and Biscuits': 'Chocolates & Biscuits',
-    'Bakery, Cakes & Dairy': 'Chocolates & Biscuits',
-    'Indian Sweets': 'Snacks & Namkeen',
-    'Snacks and Namkeen': 'Snacks & Namkeen',
-    'Pasta, Soup and Noodles': 'Snacks & Namkeen',
-    'Fruit Juices and Fruit Drinks': 'Fruit Juice & Energy Drinks',
-    'Energy and Soft Drinks': 'Fruit Juice & Energy Drinks',
-    'Detergents and Dishwash': 'Soaps & Detergent',
-    'Cleaning & Household': 'Cleaning & Household',
-    'Pet Care': 'Cleaning & Household',
-    'Stationery': 'Stationery',
+// ─── STEP 1: Delete all existing products ─────────────────────────────────
+async function deleteAllProducts() {
+    console.log('🗑️  Deleting all existing products...')
+    // Delete where id > 0 (deletes everything)
+    const { error } = await supabase
+        .from('products')
+        .delete()
+        .gte('id', 0)   // matches all rows
+
+    if (error) {
+        // Try alternate: delete where id is not null
+        const { error: e2 } = await supabase
+            .from('products')
+            .delete()
+            .not('id', 'is', null)
+        if (e2) {
+            console.error('❌ Delete failed:', e2.message)
+            process.exit(1)
+        }
+    }
+    console.log('   ✅ All products deleted.\n')
 }
 
-async function fetchKikoProducts() {
+// ─── STEP 2: Fetch all pages from Kiko ────────────────────────────────────
+async function fetchAllKikoProducts() {
     const all = []
-    for (let page = 1; page <= TOTAL_PAGES; page++) {
-        console.log(`📦 Fetching page ${page}/${TOTAL_PAGES}...`)
+    let page = 1
+
+    while (true) {
+        console.log(`📦 Fetching page ${page}...`)
         const res = await fetch(KIKO_API, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                category: 'All', sellerId: KIKO_SELLER_ID,
-                sortBy: 0, subCategoryId: 'All', page,
+                category: 'All',
+                sellerId: KIKO_SELLER_ID,
+                sortBy: 0,
+                subCategoryId: 'All',
+                page,
             }),
         })
-        if (!res.ok) { console.error(`❌ HTTP ${res.status}`); continue }
+
+        if (!res.ok) {
+            console.error(`❌ HTTP ${res.status} on page ${page}`)
+            break
+        }
+
         const json = await res.json()
         const items = json?.data?.results || []
-        if (items.length === 0) { console.log(`   ℹ️ No more items.`); break }
-        console.log(`   ✅ ${items.length} items`)
+
+        if (items.length === 0) {
+            console.log(`   ℹ️  No more items on page ${page}. Done fetching.`)
+            break
+        }
+
+        console.log(`   ✅ ${items.length} items (total so far: ${all.length + items.length})`)
         all.push(...items)
+        page++
+
+        // Safety cap: if we've fetched more than the known total, stop
+        const total = json?.data?.catalogueCount || 999
+        if (all.length >= total) {
+            console.log(`   ✅ Reached catalogue total (${total}). Done fetching.`)
+            break
+        }
     }
+
     return all
 }
 
-function mapProduct(item) {
-    const rawCat = (item.subCategoryId || '').trim()
-    const category = CATEGORY_MAP[rawCat] || 'Other'
-    const price = Number(item.discountedPrice || item.price || 0)
-    const mrp = Number(item.price || price)
-    const image_url = item.productImages?.[0] || ''
-    const pack_size = item.weight ? String(item.weight) : ''
-    const unitRaw = (item.weightUnit || '').toUpperCase()
-    const unit = unitRaw === 'GRAMS' ? 'g'
-        : unitRaw === 'ML' ? 'ml'
-            : unitRaw === 'KG' ? 'kg'
-                : 'pc'
-    return {
-        name: (item.productName || '').trim(),
-        category,
-        price,
-        mrp,
-        pack_size,
-        unit,
-        stock: Number(item.availableQuantity || 20),
-        image_url,
-        barcode: item.barcode || '',
-    }
-}
+// ─── STEP 3: Insert name + price only ─────────────────────────────────────
+async function insertProducts(raw) {
+    // Map to only name + price
+    const products = raw
+        .map(item => ({
+            name: (item.productName || '').trim(),
+            price: Number(item.discountedPrice || item.price || 0),
+            mrp: Number(item.price || 0),
+            // Required fields that need a value so DB doesn't reject:
+            category: 'Other',
+            pack_size: '',
+            unit: 'pc',
+            stock: Number(item.availableQuantity || 10),
+            image_url: item.productImages?.[0] || '',
+            barcode: '',
+        }))
+        .filter(p => p.name)   // skip blank names
 
-async function upsertToSupabase(products) {
-    console.log(`\n🚀 Inserting ${products.length} products...`)
+    console.log(`\n🚀 Inserting ${products.length} products (name + price)...`)
+
     const BATCH = 50
     let done = 0
+
     for (let i = 0; i < products.length; i += BATCH) {
         const batch = products.slice(i, i + BATCH)
-        const { error } = await supabase.from('products').upsert(batch, { ignoreDuplicates: true })
+        const { error } = await supabase.from('products').insert(batch)
         if (error) {
             console.error(`❌ Batch ${Math.floor(i / BATCH) + 1} error:`, error.message)
         } else {
@@ -102,25 +120,23 @@ async function upsertToSupabase(products) {
             console.log(`   ✅ Batch ${Math.floor(i / BATCH) + 1} done (${done}/${products.length})`)
         }
     }
+
     return done
 }
 
+// ─── MAIN ──────────────────────────────────────────────────────────────────
 ; (async () => {
-    console.log('══════════════════════════════════════')
-    console.log('  MRN Mulla – Kiko Product Importer')
-    console.log('══════════════════════════════════════\n')
+    console.log('══════════════════════════════════════════')
+    console.log('  MRN Mulla – Kiko Importer (Name+Price)')
+    console.log('══════════════════════════════════════════\n')
 
-    const raw = await fetchKikoProducts()
-    console.log(`\n📊 Total fetched: ${raw.length}`)
+    await deleteAllProducts()
 
-    const mapped = raw.map(mapProduct).filter(p => p.name)
-    console.log(`📝 Valid: ${mapped.length}`)
+    const raw = await fetchAllKikoProducts()
+    console.log(`\n📊 Total fetched from Kiko: ${raw.length}`)
 
-    console.log('\n📋 Preview (first 5):')
-    mapped.slice(0, 5).forEach((p, i) =>
-        console.log(`  ${i + 1}. ${p.name} | ${p.category} | ₹${p.price}`)
-    )
+    const count = await insertProducts(raw)
 
-    const count = await upsertToSupabase(mapped)
-    console.log(`\n✅ Done! ${count} products inserted. Open Admin App → Products to verify.\n`)
+    console.log(`\n✅ Done! ${count} products added to Supabase.`)
+    console.log('   Open Admin App → Products to verify.\n')
 })()
