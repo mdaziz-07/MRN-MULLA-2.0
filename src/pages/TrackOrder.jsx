@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
     Check, Phone, MessageCircle, Share2,
@@ -32,6 +32,8 @@ export default function TrackOrder() {
     const [loggedInMobile, setLoggedInMobile] = useState('')
     const [isReordering, setIsReordering] = useState(false)
     const { replaceCart } = useCart()
+    const isFirstSingleLoadRef = useRef(true)
+    const isFirstListLoadRef = useRef(true)
 
     // Get saved mobile from localStorage
     useEffect(() => {
@@ -56,6 +58,8 @@ export default function TrackOrder() {
         }
 
         const fetchOrder = async () => {
+            // Only show loading spinner on first fetch; polling is silent
+            if (isFirstSingleLoadRef.current) setLoading(true)
             try {
                 const { data, error } = await supabase
                     .from('orders')
@@ -72,6 +76,7 @@ export default function TrackOrder() {
                 setOrder(null)
             } finally {
                 setLoading(false)
+                isFirstSingleLoadRef.current = false
             }
         }
 
@@ -100,6 +105,8 @@ export default function TrackOrder() {
     }, [orderId, loggedInMobile])
 
     const fetchOrdersByMobile = async (mobile) => {
+        // Only show spinner on first load; polling is silent
+        if (isFirstListLoadRef.current) setLoading(true)
         try {
             const { data, error } = await supabase
                 .from('orders')
@@ -119,8 +126,10 @@ export default function TrackOrder() {
             setOrders([])
         } finally {
             setLoading(false)
+            isFirstListLoadRef.current = false
         }
     }
+
 
     // Handle mobile number submit
     const handleMobileSubmit = () => {
@@ -480,27 +489,26 @@ export default function TrackOrder() {
                 <button
                     onClick={async () => {
                         const trackUrl = `https://mrnmullakiranashop.vercel.app/track/${orderId}`;
-                        const shareData = {
-                            title: `Order #${orderId}`,
-                            text: `Track my order from ${STORE_NAME}`,
-                            url: trackUrl,
-                        };
                         try {
-                            // Try native share first (works on some Android browsers)
-                            if (navigator.share && navigator.canShare?.(shareData)) {
-                                await navigator.share(shareData);
-                            } else {
-                                // Fallback: copy link to clipboard
-                                await navigator.clipboard.writeText(trackUrl);
-                                toast.success('📋 Link copied! Paste it to share.');
-                            }
+                            // Use Capacitor Share plugin — opens native Android share sheet
+                            const { Share } = await import('@capacitor/share')
+                            await Share.share({
+                                title: `Order #${String(orderId).slice(0, 6).toUpperCase()}`,
+                                text: `Track my order from ${STORE_NAME}`,
+                                url: trackUrl,
+                                dialogTitle: 'Share Order Link',
+                            })
                         } catch (e) {
-                            // Final fallback if clipboard also fails
+                            // Fallback: try Web Share API, then clipboard
                             try {
-                                await navigator.clipboard.writeText(trackUrl);
-                                toast.success('📋 Link copied!');
+                                if (navigator.share) {
+                                    await navigator.share({ title: `Order #${orderId}`, url: trackUrl })
+                                } else {
+                                    await navigator.clipboard.writeText(trackUrl)
+                                    toast.success('📋 Link copied! Paste it to share.')
+                                }
                             } catch {
-                                toast.error('Could not share. Try copying manually.');
+                                toast.error('Could not share. Try copying manually.')
                             }
                         }
                     }}
@@ -627,7 +635,7 @@ export default function TrackOrder() {
             </div>
 
             {/* ─── Help Actions ─── */}
-            <div className="p-4 flex gap-3 pb-8">
+            <div className="p-4 flex gap-3 pb-[calc(env(safe-area-inset-bottom)+2rem)]">
                 <a
                     href={`tel:${STORE_PHONE}`}
                     className="flex-1 flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl bg-white border-2 border-[#023430] text-[#023430] font-semibold active:scale-95 transition-transform shadow-sm"

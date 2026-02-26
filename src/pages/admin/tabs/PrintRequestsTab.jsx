@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { FileText, Phone, Check, X, Printer, ExternalLink, Image, Eye } from 'lucide-react'
 import { supabase } from '../../../lib/supabase'
 import { toast } from 'sonner'
@@ -7,6 +7,7 @@ import { format } from 'date-fns'
 export default function PrintRequestsTab() {
     const [requests, setRequests] = useState([])
     const [loading, setLoading] = useState(true)
+    const isFirstLoadRef = useRef(true)
 
     useEffect(() => {
         fetchRequests()
@@ -27,7 +28,10 @@ export default function PrintRequestsTab() {
     }, [])
 
     const fetchRequests = async () => {
-        setLoading(true)
+        // Only show spinner on first load; polling refreshes are silent
+        if (isFirstLoadRef.current) {
+            setLoading(true)
+        }
         const { data } = await supabase
             .from('print_orders')
             .select('*')
@@ -35,6 +39,48 @@ export default function PrintRequestsTab() {
 
         if (data) setRequests(data)
         setLoading(false)
+        isFirstLoadRef.current = false
+
+        // Auto-cleanup: delete records + storage files older than 1 hour
+        cleanupOldRequests()
+    }
+
+    const cleanupOldRequests = async () => {
+        try {
+            const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+
+            // Find old records
+            const { data: oldRecords } = await supabase
+                .from('print_orders')
+                .select('id, files')
+                .lt('created_at', oneHourAgo)
+
+            if (!oldRecords || oldRecords.length === 0) return
+
+            // Extract storage file paths from URLs and delete them
+            const filePaths = []
+            oldRecords.forEach(record => {
+                const files = record.files || []
+                files.forEach(f => {
+                    if (f.url) {
+                        // Extract path after /object/public/print-docs/
+                        const match = f.url.match(/\/object\/public\/print-docs\/(.+)/)
+                        if (match) filePaths.push(match[1])
+                    }
+                })
+            })
+
+            if (filePaths.length > 0) {
+                await supabase.storage.from('print-docs').remove(filePaths)
+            }
+
+            // Delete the DB records
+            const ids = oldRecords.map(r => r.id)
+            await supabase.from('print_orders').delete().in('id', ids)
+        } catch (err) {
+            // Silently fail — cleanup is best-effort
+            console.warn('Auto-cleanup error:', err)
+        }
     }
 
     const updateStatus = async (id, status) => {

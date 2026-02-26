@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from 'react'
 import {
     Search, Phone, RefreshCw, ChevronDown, ChevronUp,
     MapPin, Package, Bike, Check, X, ExternalLink,
-    Clock, CreditCard, Banknote, Loader2, Bell, Navigation
+    Clock, CreditCard, Banknote, Loader2, Bell, Navigation, Printer
 } from 'lucide-react'
-import { supabase, STORE_PHONE } from '../../../lib/supabase'
+import { supabase, STORE_PHONE, STORE_NAME, STORE_LOCATION_TEXT } from '../../../lib/supabase'
 import { toast } from 'sonner'
 
 const STATUS_STYLES = {
@@ -100,10 +100,14 @@ export default function OrdersTab() {
     const [selectedOrder, setSelectedOrder] = useState(null)
     const [statusFilter, setStatusFilter] = useState('All')
     const prevOrderCountRef = useRef(0)
+    const isFirstLoadRef = useRef(true)
 
     // Fetch orders
     const fetchOrders = async () => {
-        setLoading(true)
+        // Only show spinner on first load; polling refreshes are silent
+        if (isFirstLoadRef.current) {
+            setLoading(true)
+        }
         try {
             const { data, error } = await supabase
                 .from('orders')
@@ -146,6 +150,7 @@ export default function OrdersTab() {
             ])
         } finally {
             setLoading(false)
+            isFirstLoadRef.current = false
         }
     }
 
@@ -252,6 +257,75 @@ export default function OrdersTab() {
         const d = new Date(dateStr)
         return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) +
             ', ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    }
+
+    // ─── Print Bill via RawBt App ───
+    const handlePrintBill = (o) => {
+        try {
+            // 57mm thermal printer = 32 chars per line
+            // Cols: name=17  rate=4  qty=3  amt=5 → 17+1+4+1+3+1+5 = 32 ✓
+            const NAME_COL = 17
+            const line = '--------------------------------'   // 32 dashes
+
+            const date = new Date(o.created_at).toLocaleDateString('en-IN', {
+                day: '2-digit', month: 'short', year: 'numeric'
+            })
+            const time = new Date(o.created_at).toLocaleTimeString('en-IN', {
+                hour: '2-digit', minute: '2-digit'
+            })
+
+            // ESC/POS alignment commands
+            const ALIGN_CENTER = '\x1b\x61\x01'
+            const ALIGN_LEFT = '\x1b\x61\x00'
+
+            let bill = ''
+            bill += ALIGN_CENTER
+            bill += STORE_NAME + '\n'
+            bill += STORE_LOCATION_TEXT + '\n'
+            bill += 'Phone: ' + STORE_PHONE + '\n'
+            bill += ALIGN_LEFT
+            bill += line + '\n'
+            bill += `Date: ${date}  ${time}\n`
+            bill += `Order: #${String(o.id).slice(0, 8).toUpperCase()}\n`
+            if (o.customer_json?.name) bill += `Customer: ${o.customer_json.name}\n`
+            if (o.customer_json?.area) bill += `Address: ${o.customer_json.house_no ? o.customer_json.house_no + ', ' : ''}${o.customer_json.area}\n`
+            bill += line + '\n'
+            // Header — exact 32 chars: 17+1+4+1+3+1+5 = 32
+            bill += 'Item'.padEnd(NAME_COL) + ' ' + 'Rate'.padStart(4) + ' ' + 'Qty'.padStart(3) + ' ' + 'Amt'.padStart(5) + '\n'
+            bill += line + '\n'
+
+            const items = o.cart_json || []
+            items.forEach(item => {
+                const fullName = (item.name || '')
+                const rate = String(item.price).padStart(4)
+                const qty = String(item.qty).padStart(3)
+                const amt = String(item.price * item.qty).padStart(5)
+
+                // Always put numbers on line 1 with first NAME_COL chars of name
+                // If name overflows, the excess wraps to line 2
+                bill += fullName.slice(0, NAME_COL).padEnd(NAME_COL) + ' ' + rate + ' ' + qty + ' ' + amt + '\n'
+                if (fullName.length > NAME_COL) {
+                    bill += fullName.slice(NAME_COL) + '\n'
+                }
+            })
+
+            bill += line + '\n'
+            bill += 'TOTAL:'.padEnd(NAME_COL + 1) + String(o.total_amount).padStart(4 + 1 + 2 + 1 + 5) + '\n'
+            bill += `Payment: ${o.payment_method || 'COD'}\n`
+            if (o.payment_status === 'Paid') bill += 'Status: PAID \u2713\n'
+            bill += line + '\n'
+            bill += ALIGN_CENTER
+            bill += 'Thank you for your order!\n'
+            bill += ALIGN_LEFT
+            bill += '\n\n\n'
+
+            // rawbt: URI — content starts directly after the colon (no ?text= prefix)
+            const encoded = encodeURIComponent(bill)
+            window.location.href = `rawbt:${encoded}`
+        } catch (err) {
+            toast.error('Failed to generate bill')
+            console.error(err)
+        }
     }
 
     // Open Google Maps for a location
@@ -510,9 +584,17 @@ export default function OrdersTab() {
                             </a>
                         </div>
 
-                        <div className="p-4 sm:p-5 bg-gray-50 border-t flex gap-3">
+                        <div className="px-4 sm:px-5 pt-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] bg-gray-50 border-t space-y-2">
+                            {/* Print Bill — always available for admin */}
+                            <button
+                                onClick={() => handlePrintBill(selectedOrder)}
+                                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gray-800 text-white font-bold text-sm hover:bg-black transition-colors"
+                            >
+                                <Printer size={16} /> Print Bill
+                            </button>
+
                             {selectedOrder.status !== 'Delivered' && selectedOrder.status !== 'Cancelled' && (
-                                <>
+                                <div className="flex gap-3">
                                     <button
                                         onClick={() => {
                                             if (confirm('Cancel this order?')) {
@@ -534,7 +616,7 @@ export default function OrdersTab() {
                                     >
                                         {selectedOrder.status === 'Received' ? 'Dispatch Order' : 'Complete Delivery'}
                                     </button>
-                                </>
+                                </div>
                             )}
                         </div>
                     </div>

@@ -164,7 +164,7 @@ export default function ProductsTab({ selectedCategory: parentCategory, setSelec
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
-                <div className="bg-gray-100 px-3 py-2 rounded-lg text-xs font-bold text-gray-500 hidden sm:block">
+                <div className="bg-gray-100 px-3 py-2 rounded-lg text-xs font-bold text-gray-500 shrink-0">
                     {filteredProducts.length} Items
                 </div>
                 <button

@@ -489,17 +489,15 @@ export default function Home() {
 
             {/* ─── PRODUCT GRID ─── */}
             <main className="px-3 pb-6">
-                {/* Section Title */}
-                {selectedCategory !== 'All' && (
-                    <div className="flex items-center justify-between mb-3 px-1">
-                        <h2 className="text-lg font-bold text-[#1A1A1A]">
-                            {selectedCategory}
-                        </h2>
-                        <span className="text-[12px] text-[#757575] font-medium">
-                            {filteredProducts.length} products
-                        </span>
-                    </div>
-                )}
+                {/* Section Title — always show count */}
+                <div className="flex items-center justify-between mb-3 px-1">
+                    <h2 className="text-lg font-bold text-[#1A1A1A]">
+                        {selectedCategory === 'All' ? 'All Products' : selectedCategory}
+                    </h2>
+                    <span className="bg-gray-100 text-gray-500 text-[11px] font-bold px-2.5 py-1 rounded-full">
+                        {filteredProducts.length} items
+                    </span>
+                </div>
 
                 {searchQuery && (
                     <div className="mb-3 px-1">
@@ -553,7 +551,7 @@ export default function Home() {
 
             {/* ─── FLOATING CART BUTTON ─── */}
             {totalItems > 0 && !selectedProduct && (
-                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-auto">
+                <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+1.5rem)] left-1/2 -translate-x-1/2 z-40 w-auto">
                     <div
                         onClick={() => navigate('/checkout')}
                         className="

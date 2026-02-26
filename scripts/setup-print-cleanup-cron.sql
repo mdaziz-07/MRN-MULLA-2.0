@@ -2,17 +2,16 @@
 CREATE EXTENSION IF NOT EXISTS pg_cron;
 CREATE EXTENSION IF NOT EXISTS pg_net;
 
--- 2. Schedule the cleanup function to run every 30 minutes
--- IMPORTANT: Replace 'YOUR_anon_OR_service_role_KEY' below with your actual Project API Key!
+-- 2. Schedule the cleanup function to run every 1 hour
 SELECT cron.schedule(
-  'cleanup-print-files-every-30-minutes', -- Unique name for the cron job
-  '*/30 * * * *',                         -- Cron syntax: Run every 30 minutes
+  'cleanup-print-files-every-hour',   -- Job name
+  '0 * * * *',                        -- Every hour at :00
   $$
     SELECT net.http_post(
       url:='https://vkbhvzgcnagxyhoiuaoj.supabase.co/functions/v1/cleanup-print-files',
       headers:=jsonb_build_object(
         'Content-Type', 'application/json',
-        'Authorization', 'Bearer YOUR_anon_OR_service_role_KEY'
+        'Authorization', 'Bearer sb_secret_RArbNCltgsRdjeePeSo55Q_hS7L3gg5'
       )
     ) as request_id;
   $$
@@ -24,6 +23,6 @@ SELECT cron.schedule(
 -- To check if the cron job successfully scheduled:
 SELECT * FROM cron.job;
 
--- To pause/delete this specific job later:
-SELECT cron.unschedule('cleanup-print-files-every-30-minutes');
+-- To delete this job later if needed:
+SELECT cron.unschedule('cleanup-print-files-every-hour');
 */

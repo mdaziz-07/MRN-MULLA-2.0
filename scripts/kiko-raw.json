@@ -1,0 +1,426 @@
+{
+  "success": true,
+  "message": "Catalogue fetched successfully.",
+  "data": {
+    "results": [
+      {
+        "_id": "6965da2a95c262aaa3c20c85",
+        "productImages": [
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/xXhMKqFqO.png",
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/eTOENwqkY.png"
+        ],
+        "isReturnable": false,
+        "isCancellable": false,
+        "userId": "69298771bc54dbb080aaddbe",
+        "productName": "Rupani's Ginger & Garlic Paste",
+        "weight": 1,
+        "subCategoryId": "Masala & Seasoning",
+        "weightUnit": "UNIT",
+        "availableQuantity": "20",
+        "description": "Avior, Nirmal Galaxy, L.B.S. Mumbai- 400 080, Lal Bahadur Shastri Marg, P&T Staff Colony, Mulund West, Mumbai, Maharashtra 400149, India",
+        "price": "5",
+        "discountedPrice": "5",
+        "discountedPriceNumber": 5
+      },
+      {
+        "_id": "6964f3c795c262aaa3c202e3",
+        "productImages": [
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/tVrRw7Lyr.png",
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/q0ojakl6_.png"
+        ],
+        "isReturnable": false,
+        "isCancellable": false,
+        "userId": "69298771bc54dbb080aaddbe",
+        "productName": "EVEREST PASTA MASALA",
+        "weight": 1,
+        "subCategoryId": "Pasta, Soup and Noodles",
+        "weightUnit": "UNIT",
+        "availableQuantity": "20",
+        "description": "Avior, Nirmal Galaxy, L.B.S. Mumbai- 400 080, Lal Bahadur Shastri Marg, P&T Staff Colony, Mulund West, Mumbai, Maharashtra 400149, India",
+        "price": "5",
+        "discountedPrice": "5",
+        "discountedPriceNumber": 5
+      },
+      {
+        "_id": "6965d06695c262aaa3c209f4",
+        "productImages": [
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/KNXmrOSIU.png",
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/iKynYssG-.png"
+        ],
+        "isReturnable": false,
+        "isCancellable": false,
+        "userId": "69298771bc54dbb080aaddbe",
+        "productName": "BOOST",
+        "weight": 1,
+        "subCategoryId": "Tea and Coffee",
+        "weightUnit": "UNIT",
+        "availableQuantity": "20",
+        "description": "Avior, Nirmal Galaxy, L.B.S. Mumbai- 400 080, Lal Bahadur Shastri Marg, P&T Staff Colony, Mulund West, Mumbai, Maharashtra 400149, India",
+        "price": "5",
+        "discountedPrice": "5",
+        "discountedPriceNumber": 5
+      },
+      {
+        "_id": "6965d16d95c262aaa3c209fd",
+        "productImages": [
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/jEx5gGoLO.png",
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/7V8X14upi.png",
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/3A_nUTrSS.png"
+        ],
+        "isReturnable": false,
+        "isCancellable": false,
+        "userId": "69298771bc54dbb080aaddbe",
+        "productName": "Fevikwik",
+        "weight": 1,
+        "subCategoryId": "Cleaning & Household",
+        "weightUnit": "UNIT",
+        "availableQuantity": "20",
+        "description": "Avior, Nirmal Galaxy, L.B.S. Mumbai- 400 080, Lal Bahadur Shastri Marg, P&T Staff Colony, Mulund West, Mumbai, Maharashtra 400149, India",
+        "price": "5",
+        "discountedPrice": "5",
+        "discountedPriceNumber": 5
+      },
+      {
+        "_id": "693a8026846d20ce8fb46574",
+        "isCancellable": false,
+        "isReturnable": false,
+        "productImages": [
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/productImages/8901248101448_0.jpg",
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/productImages/8901248101448_1.jpg"
+        ],
+        "userId": "69298771bc54dbb080aaddbe",
+        "subCategoryId": "Cleaning & Household",
+        "productName": "Boroplus Ayurvedic Antiseptic Cream, 5ml",
+        "availableQuantity": "19",
+        "weightUnit": "ML",
+        "price": "5",
+        "discountedPrice": "5",
+        "description": "Boroplus Ayurvedic Antiseptic Cream for face, hands, and body. Provides 24hr moisturisation with no parabens. It is a multipurpose use cream containing extracts of various herbs like Hedychium spicatum, Santalum album, and Aloe barbadensis. Perfect for dry skin diseases, minor burns, and cuts.",
+        "weight": 5,
+        "discountedPriceNumber": 5
+      },
+      {
+        "_id": "693a8026846d20ce8fb4657d",
+        "isCancellable": false,
+        "isReturnable": false,
+        "productImages": [
+          "https://polestarreimagestorage.s3.ap-south-1.amazonaws.com/ONDC+Images/8901725005856_1.jpg",
+          "https://polestarreimagestorage.s3.ap-south-1.amazonaws.com/ONDC+Images/8901725005856_2.jpg",
+          "https://polestarreimagestorage.s3.ap-south-1.amazonaws.com/ONDC+Images/8901725005856_1.jpg"
+        ],
+        "userId": "69298771bc54dbb080aaddbe",
+        "subCategoryId": "Pasta, Soup and Noodles",
+        "productName": "Sunfeast Instant Noodles, Masala Magic, 30 G Pouch",
+        "availableQuantity": "19",
+        "weightUnit": "GRAMS",
+        "price": "5",
+        "discountedPrice": "5",
+        "description": "Looking for a snack filled with magic, masala and masti? Then Sunfeast YiPPee! Magic Masala Noodles is just what you were looking for. Every bite will simply dazzle your taste buds. Made with the finest ingredients and the goodness of real vegetables. YiPPee!'s a delicious mix of Indian spices that give it the much-loved magical masala taste. The goodness of vegetables adds more texture and a healthy dash of colour to every bite of Noodles!Super quick, deliciously tasty and utterly wholesome! The kids will love it and so will you! A delicious noodle treat loaded with nutrients such as Calcium, Iron, Vitamin C, Folic Acid and Protein, all of which are essential for maintaining good health.Sunfeast YiPPee! Magic Masala Noodles comes packed in a unique round block, ensuring that your noodles remain long, non-sticky and super slurpy every time. So, each time you sit down to devour this treat, expect the same mouth-watering and deliciously slurpy experience as last time.Relish them as a wholesome breakfast treat or as an exciting evening snack or even as a quick midnight meal, the choice is all yours. Whenever those hunger packs need to be taken care of, YiPPee! Magic Masala Noodles is your go-to snack.",
+        "weight": 30,
+        "discountedPriceNumber": 5
+      },
+      {
+        "_id": "6965cf8695c262aaa3c209cc",
+        "productImages": [
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/whnQH_Na0.png",
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/9Gc4M5Kcy.png",
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/VoURyWlmo.png"
+        ],
+        "isReturnable": false,
+        "isCancellable": false,
+        "userId": "69298771bc54dbb080aaddbe",
+        "productName": "Maggi Masala Magic",
+        "weight": 1,
+        "subCategoryId": "Masala & Seasoning",
+        "weightUnit": "UNIT",
+        "availableQuantity": "20",
+        "description": "Avior, Nirmal Galaxy, L.B.S. Mumbai- 400 080, Lal Bahadur Shastri Marg, P&T Staff Colony, Mulund West, Mumbai, Maharashtra 400149, India",
+        "price": "5",
+        "discountedPrice": "5",
+        "discountedPriceNumber": 5
+      },
+      {
+        "_id": "695550b995c262aaa3c04c1d",
+        "productImages": [
+          "https://polestarreimagestorage.s3.ap-south-1.amazonaws.com/ONDC+Images/8901324054972_1.jpg",
+          "https://polestarreimagestorage.s3.ap-south-1.amazonaws.com/ONDC+Images/8901324054972_1.jpg",
+          "https://polestarreimagestorage.s3.ap-south-1.amazonaws.com/ONDC+Images/8901324054972_1.jpg"
+        ],
+        "isReturnable": false,
+        "isCancellable": false,
+        "userId": "69298771bc54dbb080aaddbe",
+        "productName": "Nataraj Be Bold Pencils (Pack Of 10)",
+        "weight": 1,
+        "subCategoryId": "Cleaning & Household",
+        "weightUnit": "UNIT",
+        "availableQuantity": "20",
+        "description": "Improved Lead for BOLD Writing, Writes more lines before Sharpening. Easy to sharp. Safe for children. Search Tags : pencils , Natraj pencils",
+        "price": "5",
+        "discountedPrice": "5",
+        "discountedPriceNumber": 5
+      },
+      {
+        "_id": "6964696195c262aaa3c1ec2c",
+        "productImages": [
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/ueCQfKA-f.png",
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/KpGM21SHl.png"
+        ],
+        "isReturnable": false,
+        "isCancellable": false,
+        "userId": "69298771bc54dbb080aaddbe",
+        "productName": "Dynobite",
+        "weight": 1,
+        "subCategoryId": "Snacks and Namkeen",
+        "weightUnit": "UNIT",
+        "availableQuantity": "20",
+        "description": "Avior, Nirmal Galaxy, L.B.S. Mumbai- 400 080, Lal Bahadur Shastri Marg, P&T Staff Colony, Mulund West, Mumbai, Maharashtra 400149, India",
+        "price": "5",
+        "discountedPrice": "5",
+        "discountedPriceNumber": 5
+      },
+      {
+        "_id": "6964f19e95c262aaa3c20242",
+        "productImages": [
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/sqfdaZ4DX.png",
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/4lvz0SbwB.png"
+        ],
+        "isReturnable": false,
+        "isCancellable": false,
+        "userId": "69298771bc54dbb080aaddbe",
+        "productName": "Dove conditioner",
+        "weight": 1,
+        "subCategoryId": "Stationery",
+        "weightUnit": "UNIT",
+        "availableQuantity": "20",
+        "description": "Avior, Nirmal Galaxy, L.B.S. Mumbai- 400 080, Lal Bahadur Shastri Marg, P&T Staff Colony, Mulund West, Mumbai, Maharashtra 400149, India",
+        "price": "5",
+        "discountedPrice": "5",
+        "discountedPriceNumber": 5
+      },
+      {
+        "_id": "694f9ce9aaecd0423212256e",
+        "isCancellable": false,
+        "isReturnable": false,
+        "productImages": [
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/6NXBOxflZ.png",
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/6NXBOxflZ.png"
+        ],
+        "userId": "69298771bc54dbb080aaddbe",
+        "subCategoryId": "Cleaning & Household",
+        "productName": "Steel Safety Pins",
+        "availableQuantity": "9",
+        "weightUnit": "UNIT",
+        "price": "5",
+        "discountedPrice": "5",
+        "description": "Strong, rust-resistant pins used for fastening clothes and repairs. They feature a smooth point to prevent snagging or damaging fabrics.",
+        "weight": 1,
+        "discountedPriceNumber": 5
+      },
+      {
+        "_id": "694f9ce9aaecd04232122567",
+        "isCancellable": false,
+        "isReturnable": false,
+        "productImages": [
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/bzWGcJfbv.png",
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/XveEwG6Dk.png"
+        ],
+        "userId": "69298771bc54dbb080aaddbe",
+        "subCategoryId": "Cleaning & Household",
+        "productName": "Ponds Cold Cream",
+        "availableQuantity": "9",
+        "weightUnit": "ML",
+        "price": "5",
+        "discountedPrice": "5",
+        "description": "A classic winter moisturizer that deeply nourishes and protects skin. It prevents dryness from cold winds while maintaining skin elasticity.",
+        "weight": 6,
+        "discountedPriceNumber": 5
+      },
+      {
+        "_id": "6957adfd95c262aaa3c082aa",
+        "productImages": [
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/0hcFVVpmo.png",
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/GfC-6fkn2.png"
+        ],
+        "isReturnable": false,
+        "isCancellable": false,
+        "userId": "69298771bc54dbb080aaddbe",
+        "productName": "",
+        "weight": 1,
+        "subCategoryId": "Eggs, Meat & Fish",
+        "weightUnit": "UNIT",
+        "availableQuantity": "20",
+        "description": "Avior, Nirmal Galaxy, L.B.S. Mumbai- 400 080, Lal Bahadur Shastri Marg, P&T Staff Colony, Mulund West, Mumbai, Maharashtra 400149, India",
+        "price": "7",
+        "discountedPrice": "7",
+        "discountedPriceNumber": 7
+      },
+      {
+        "_id": "694f9ce9aaecd0423212252f",
+        "isCancellable": false,
+        "isReturnable": false,
+        "productImages": [
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/H0I_7xaox.png",
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/uKhtzX81k.png",
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/thlAY-Sto.png",
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/w20yJKmSv.png"
+        ],
+        "userId": "69298771bc54dbb080aaddbe",
+        "subCategoryId": "Detergents and Dishwash",
+        "productName": "Surf Excel",
+        "availableQuantity": "10",
+        "weightUnit": "UNIT",
+        "price": "10",
+        "discountedPrice": "10",
+        "description": "Premium detergent that removes tough stains like grease, oil, and ink in one wash. It is formulated to work effectively even in hard water.",
+        "weight": 1,
+        "discountedPriceNumber": 10
+      },
+      {
+        "_id": "693a8026846d20ce8fb46583",
+        "isCancellable": false,
+        "isReturnable": false,
+        "productImages": [
+          "https://cdn.ndhgo.com/prod/lakshmistore_hubse_in/images/1655205167500.jpeg",
+          "https://cdn.ndhgo.com/prod/lakshmistore_hubse_in/images/1655205167500.jpeg"
+        ],
+        "userId": "69298771bc54dbb080aaddbe",
+        "subCategoryId": "Fruit Juices and Fruit Drinks",
+        "productName": "Rasna Drink Mix - Masala Orange, Chatpata, 12 Glasses, Pack Of 1",
+        "availableQuantity": "20",
+        "weightUnit": "UNIT",
+        "price": "10",
+        "discountedPrice": "10",
+        "description": "Rasna masala orange chatpata drink mix.",
+        "weight": 1,
+        "discountedPriceNumber": 10
+      },
+      {
+        "_id": "693bdc7929a074420d4fd820",
+        "isCancellable": false,
+        "isReturnable": false,
+        "productImages": [
+          "https://polestarreimagestorage.s3.ap-south-1.amazonaws.com/ONDC+Images/8901860020516_1.jpg",
+          "https://polestarreimagestorage.s3.ap-south-1.amazonaws.com/ONDC+Images/8901860020516_2.jpg",
+          "https://polestarreimagestorage.s3.ap-south-1.amazonaws.com/ONDC+Images/8901860020516_3.jpg"
+        ],
+        "userId": "69298771bc54dbb080aaddbe",
+        "subCategoryId": "Cleaning & Household",
+        "productName": "M-Seal Phataphat Fast Setting Epoxy Putty Sealant Adhesive For Leakage, Bonding, Gap Filling And Repairing, 25 Gram",
+        "availableQuantity": "20",
+        "weightUnit": "GRAMS",
+        "price": "10",
+        "discountedPrice": "10",
+        "description": "M-SEAL PHATAPHAT is a faster setting two component, multi-purpose epoxyputty. It is useful in sealing, gripping, joining insulating variety ofsurfaces like ferrous and non-ferrous metals, porcelain, ceramic, marble, granite, asbestos,glass, wood, and certain plastics. M-SEAL PHATAPHAT on curing exhibits tough long lastingbond. It sets in 25-30 minutes into a hard mass that can be drilled, filed, tapped, machined, cutand then painted. M-SEAL PHATAPHAT has very good electrical insulating properties and thecured product is resistant to moisture, heat, mild acids alkali.APPLICATION AREAINDUSTRIAL Sealing blowholes, cracks, and leakages in ferrous and non-ferrous castings,pumps and mould boxes etc. It gives smooth finish to joints corners and sealing holescracksin wooden and metal patterns. Sealing of leakagecracks in metal fabrications, industrial vessels,boilers, hulls of ships, boats and trawlers. Sealing water supply mains, storage tanks, concretesewer pipes, heat exchanger coils etc. Repairing of damaged internal threads of various types ofmachine pumps. Sealing cracks in casings of metersgear-box etc.ELECTRICAL Sealing and insulating cable terminators, cable entries into switch boxes,machines etc. Covering and insulating underground and overhead twist-joints of aluminiumconductors. Sealing flanges and cable entry portions of conventional cable-jointsmoulds tomake them moisture-proof. Sealing leakage in transformers, oil circuit breakers and other oilfilled electrical switchgear equipment.AUTOMOBILE Sealing leakage in radiator, diesel petrol tank, waterfuel pumps, engineblocks, gear boxes, differential, carburetor, battery casing, muffler, silencer, fuel injection pumps.GENERAL Repairing and sealing surfaces underwater like plugging a hole, repairing andsealing leakage in overhead flush tanks, taps, pipelines etc. Filling gaps in aluminium slidewindows, channels and concrete.",
+        "weight": 25,
+        "discountedPriceNumber": 10
+      },
+      {
+        "_id": "694f9ce9aaecd04232122530",
+        "isCancellable": false,
+        "isReturnable": false,
+        "productImages": [
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/EMI6ira5Z.png",
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/EMI6ira5Z.png"
+        ],
+        "userId": "69298771bc54dbb080aaddbe",
+        "subCategoryId": "Detergents and Dishwash",
+        "productName": "Shakti Detergent Cake",
+        "availableQuantity": "10",
+        "weightUnit": "UNIT",
+        "price": "10",
+        "discountedPrice": "10",
+        "description": "An affordable and powerful laundry soap for thorough cleaning of everyday wear. It removes stubborn dirt while maintaining the fabric's brightness.",
+        "weight": 1,
+        "discountedPriceNumber": 10
+      },
+      {
+        "_id": "694f9ce9aaecd0423212252e",
+        "isCancellable": false,
+        "isReturnable": false,
+        "productImages": [
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/uAXrUDixu.png",
+          "https://kikonewapi.s3.ap-south-1.amazonaws.com/uploads/user_images/l6GeuvOUJ.png"
+        ],
+        "userId": "69298771bc54dbb080aaddbe",
+        "subCategoryId": "Detergents and Dishwash",
+        "productName": "Rin",
+        "availableQuantity": "10",
+        "weightUnit": "UNIT",
+        "price": "10",
+        "discountedPrice": "10",
+        "description": "High-performance detergent bar that targets deep-seated dirt in cuffs and collars. It uses \"Bright Clean\" technology to make clothes look like new.",
+        "weight": 1,
+        "discountedPriceNumber": 10
+      },
+      {
+        "_id": "693a8026846d20ce8fb46586",
+        "isCancellable": false,
+        "isReturnable": false,
+        "productImages": [
+          "https://polestarreimagestorage.s3.ap-south-1.amazonaws.com/ONDC+Images/8901324580020_1.jpg",
+          "https://polestarreimagestorage.s3.ap-south-1.amazonaws.com/ONDC+Images/8901324580020_1.jpg",
+          "https://polestarreimagestorage.s3.ap-south-1.amazonaws.com/ONDC+Images/8901324580020_1.jpg"
+        ],
+        "userId": "69298771bc54dbb080aaddbe",
+        "subCategoryId": "Cleaning & Household",
+        "productName": "Nataraj 621 15Cm Scale",
+        "availableQuantity": "20",
+        "weightUnit": "UNIT",
+        "price": "10",
+        "discountedPrice": "10",
+        "description": "Unleash your creativity and organization with Nataraj School Supplies range, the ultimate stationery collection for all your writing, drawing, and planning needs. Whether you're a student, professional, or creative enthusiast, our thoughtfully curated stationery ensures that you have the tools to express yourself and stay productive in style.",
+        "weight": 1,
+        "discountedPriceNumber": 10
+      },
+      {
+        "_id": "693a8026846d20ce8fb46599",
+        "isCancellable": false,
+        "isReturnable": false,
+        "productImages": [
+          "https://polestarreimagestorage.s3.ap-south-1.amazonaws.com/OLA+Catalog-Imgs_2/SKU973_1.jpg",
+          "https://polestarreimagestorage.s3.ap-south-1.amazonaws.com/OLA+Catalog-Imgs_2/SKU973_2.jpg",
+          "https://polestarreimagestorage.s3.ap-south-1.amazonaws.com/OLA+Catalog-Imgs_2/SKU973_3.jpg",
+          "https://polestarreimagestorage.s3.ap-south-1.amazonaws.com/OLA+Catalog-Imgs_2/SKU973_4.jpg",
+          "https://polestarreimagestorage.s3.ap-south-1.amazonaws.com/OLA+Catalog-Imgs_2/SKU973_5.jpg"
+        ],
+        "userId": "69298771bc54dbb080aaddbe",
+        "subCategoryId": "Fruit Juices and Fruit Drinks",
+        "code": "RET-10",
+        "productName": "Paper Boat Swing Juicier Drink - Slurpy Mango, 125 ml",
+        "availableQuantity": "20",
+        "weightUnit": "ML",
+        "price": "10",
+        "discountedPrice": "10",
+        "description": "During summer, there is barely a home in Western India, be it Gujarat or Rajasthan, that doesn't partake in the festivity that is Amaras. Sometimes they have it with milk, sometimes with rotis, and if time and patience allow, they even make sweets out of it. But the best way to enjoy Amaras is to have it directly as it is, the way the ancients intended, without preservatives or artificial flavour, without frills or hassles. An honest treat for an honest dayâ€™s work, a silken Amaras cascading down your throat - soothing, serenading, and, more importantly, lingering, to remind you that the mango is indeed the true king of the fruit realm and that we cannot help but submit to its tasty tyranny.",
+        "weight": 125,
+        "discountedPriceNumber": 10
+      }
+    ],
+    "catalogueCount": 305,
+    "activeCategories": [
+      "Atta, Flours and Sooji",
+      "Bakery, Cakes & Dairy",
+      "Cereals and Breakfast",
+      "Chocolates and Biscuits",
+      "Cleaning & Household",
+      "Cooking and Baking Needs",
+      "Dals and Pulses",
+      "Detergents and Dishwash",
+      "Eggs, Meat & Fish",
+      "Energy and Soft Drinks",
+      "Fruit Juices and Fruit Drinks",
+      "Indian Sweets",
+      "Masala & Seasoning",
+      "Oil & Ghee",
+      "Pasta, Soup and Noodles",
+      "Pet Care",
+      "Pickles and Chutney",
+      "Rice and Rice Products",
+      "Salt, Sugar and Jaggery",
+      "Sauces, Spreads and Dips",
+      "Snacks and Namkeen",
+      "Stationery",
+      "Tea and Coffee"
+    ]
+  }
+}
