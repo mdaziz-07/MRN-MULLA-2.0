@@ -388,43 +388,38 @@ export default function Home() {
     return (
         <div className="min-h-screen bg-gray-50 pb-32">
 
-            {/* ─── WEB-ONLY APK DOWNLOAD BANNER (fixed bottom, always tappable) ─── */}
+            {/* ─── WEB-ONLY APK DOWNLOAD BANNER (fixed top) ─── */}
             {Capacitor.getPlatform() === 'web' && showAppPrompt && (
                 <div
                     style={{ zIndex: 9999 }}
-                    className="fixed bottom-0 left-0 right-0 bg-[#E0A75E] text-[#023430] px-4 py-3 shadow-2xl border-t-2 border-[#023430]/10"
+                    className="fixed top-0 left-0 right-0 bg-[#E0A75E] text-[#023430] px-4 py-2 flex items-center justify-between shadow-md gap-2"
                 >
-                    <div className="max-w-md mx-auto flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2 shrink-0">
-                            <Download size={18} className="animate-bounce" />
-                            <div>
-                                <p className="text-xs font-black uppercase tracking-wider">Get Our App!</p>
-                                <p className="text-[10px] opacity-70">Better experience on the app</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                            <a
-                                href="https://github.com/mdaziz-07/MRN-Mulla-Kirana-APK/releases/latest/download/MRN.Mulla.Kirana.apk"
-                                className="bg-[#023430] text-white px-3 py-1.5 rounded-full text-[11px] font-bold shadow-sm active:scale-95 transition-transform"
-                            >
-                                Download
-                            </a>
-                            <button
-                                type="button"
-                                onClick={() => dismissAppBanner()}
-                                className="text-[10px] font-bold underline opacity-70 whitespace-nowrap px-1 py-1.5"
-                            >
-                                Continue
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => dismissAppBanner()}
-                                className="w-7 h-7 flex items-center justify-center bg-[#023430]/15 rounded-full font-bold text-lg leading-none"
-                                aria-label="Close"
-                            >
-                                ✕
-                            </button>
-                        </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                        <Download size={16} className="animate-bounce" />
+                        <span className="text-xs font-black uppercase tracking-wider">Get the App!</span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                        <a
+                            href="https://github.com/mdaziz-07/MRN-Mulla-Kirana-APK/releases/latest/download/MRN.Mulla.Kirana.apk"
+                            className="bg-[#023430] text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-sm active:scale-95 transition-transform"
+                        >
+                            Download
+                        </a>
+                        <button
+                            type="button"
+                            onClick={() => dismissAppBanner()}
+                            className="text-[10px] font-bold underline opacity-70 whitespace-nowrap px-1 py-1"
+                        >
+                            Continue on Web
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => dismissAppBanner()}
+                            className="w-6 h-6 flex items-center justify-center bg-[#023430]/15 rounded-full font-bold text-sm leading-none"
+                            aria-label="Close"
+                        >
+                            ✕
+                        </button>
                     </div>
                 </div>
             )}
