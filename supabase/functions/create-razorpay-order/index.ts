@@ -36,12 +36,18 @@ serve(async (req: Request) => {
     let totalAmount = 0;
     cart.forEach((cartItem: any) => {
       const dbProduct = dbProducts?.find((p: any) => p.id === cartItem.id);
-      if (dbProduct) {
-        totalAmount += dbProduct.price * cartItem.quantity;
-      }
+      // Use DB price if found, otherwise trust the price passed from the client
+      const unitPrice = dbProduct ? dbProduct.price : (cartItem.price || 0);
+      totalAmount += unitPrice * (cartItem.quantity || cartItem.qty || 1);
     });
 
     totalAmount += deliveryFee;
+
+    // Razorpay minimum is ₹1 (100 paise) — enforce that
+    if (totalAmount < 1) {
+      throw new Error("Order total must be at least ₹1 to pay online.");
+    }
+
     const amountInPaise = Math.round(totalAmount * 100);
 
     const rzpKey = Deno.env.get('RAZORPAY_KEY_ID');

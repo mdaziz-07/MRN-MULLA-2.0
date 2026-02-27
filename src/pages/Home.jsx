@@ -131,6 +131,22 @@ export default function Home() {
     const [shopOpen, setShopOpen] = useState(true)
     const [products, setProducts] = useState(PRODUCTS)
     const [showAppPrompt, setShowAppPrompt] = useState(false)
+
+    // Dismiss app banner on web
+    useEffect(() => {
+        if (typeof window !== 'undefined' && Capacitor.getPlatform() === 'web') {
+            const dismissed = localStorage.getItem('hideAppBanner')
+            if (!dismissed) {
+                const t = setTimeout(() => setShowAppPrompt(true), 1500)
+                return () => clearTimeout(t)
+            }
+        }
+    }, [])
+
+    const dismissAppBanner = () => {
+        localStorage.setItem('hideAppBanner', 'true')
+        setShowAppPrompt(false)
+    }
     const [showAddressModal, setShowAddressModal] = useState(false)
     const [savedAddresses, setSavedAddresses] = useState([])
     const [customerPhone, setCustomerPhone] = useState('')
@@ -373,18 +389,33 @@ export default function Home() {
         <div className="min-h-screen bg-gray-50 pb-32">
 
             {/* ─── WEB-ONLY APK DOWNLOAD BANNER ─── */}
-            {Capacitor.getPlatform() === 'web' && (
-                <div className="bg-[#E0A75E] text-[#023430] px-4 py-2 flex items-center justify-between z-20 relative shadow-sm">
-                    <div className="flex items-center gap-2">
+            {Capacitor.getPlatform() === 'web' && showAppPrompt && (
+                <div className="bg-[#E0A75E] text-[#023430] px-4 py-2.5 flex items-center justify-between z-20 relative shadow-sm gap-2">
+                    <div className="flex items-center gap-2 shrink-0">
                         <Download size={16} className="animate-bounce" />
                         <span className="text-xs font-black uppercase tracking-wider">Get the App!</span>
                     </div>
-                    <a
-                        href="https://github.com/mdaziz-07/MRN-Mulla-Kirana-APK/releases/latest/download/MRN.Mulla.Kirana.apk"
-                        className="bg-[#023430] text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-sm active:scale-95 transition-transform"
-                    >
-                        Download
-                    </a>
+                    <div className="flex items-center gap-2">
+                        <a
+                            href="https://github.com/mdaziz-07/MRN-Mulla-Kirana-APK/releases/latest/download/MRN.Mulla.Kirana.apk"
+                            className="bg-[#023430] text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-sm active:scale-95 transition-transform"
+                        >
+                            Download
+                        </a>
+                        <button
+                            onClick={dismissAppBanner}
+                            className="text-[10px] font-bold underline opacity-70 hover:opacity-100 whitespace-nowrap"
+                        >
+                            Continue on Web
+                        </button>
+                        <button
+                            onClick={dismissAppBanner}
+                            className="p-1 bg-[#023430]/10 rounded-full hover:bg-[#023430]/20 active:scale-90 transition-transform ml-1"
+                            aria-label="Close"
+                        >
+                            <X size={14} />
+                        </button>
+                    </div>
                 </div>
             )}
 

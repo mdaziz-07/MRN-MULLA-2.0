@@ -109,6 +109,9 @@ export default function Checkout() {
     const [orderId, setOrderId] = useState(null)
     const [deliveryCharge, setDeliveryCharge] = useState(0)
     const [minOrderForFreeDelivery, setMinOrderForFreeDelivery] = useState(0)
+    const [editingContact, setEditingContact] = useState(false)
+    const [editName, setEditName] = useState('')
+    const [editPhone, setEditPhone] = useState('')
 
     // Load store delivery settings
     useEffect(() => {
@@ -732,12 +735,64 @@ export default function Checkout() {
                     </div>
 
                     <div className="space-y-4">
-                        <div className="bg-gray-50 rounded-xl p-3 flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-bold text-gray-900">{name}</p>
-                                <p className="text-xs text-gray-500">📱 {phone}</p>
-                            </div>
-                            <button onClick={clearSavedCustomer} className="text-xs text-[#023430] font-bold px-3 py-1.5 rounded-lg bg-white border border-gray-200">Change Contact</button>
+                        <div className="bg-gray-50 rounded-xl p-3">
+                            {editingContact ? (
+                                <div className="space-y-3">
+                                    <p className="text-xs font-bold text-[#023430] mb-2">Edit Contact Details</p>
+                                    <input
+                                        type="text"
+                                        placeholder="Your Name"
+                                        className="input-field bg-white w-full"
+                                        value={editName}
+                                        onChange={e => setEditName(e.target.value)}
+                                    />
+                                    <input
+                                        type="tel"
+                                        placeholder="Mobile Number"
+                                        className="input-field bg-white w-full"
+                                        maxLength={10}
+                                        value={editPhone}
+                                        onChange={e => setEditPhone(e.target.value.replace(/\D/g, ''))}
+                                    />
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => {
+                                                if (editName.trim()) setName(editName.trim())
+                                                if (editPhone.length >= 10) setPhone(editPhone)
+                                                const saved = JSON.parse(localStorage.getItem('mrn_customer_data') || '{}')
+                                                localStorage.setItem('mrn_customer_data', JSON.stringify({
+                                                    ...saved,
+                                                    name: editName.trim() || saved.name,
+                                                    phone: editPhone.length >= 10 ? editPhone : saved.phone,
+                                                }))
+                                                setEditingContact(false)
+                                            }}
+                                            className="flex-1 py-2 rounded-lg bg-[#023430] text-white text-sm font-bold"
+                                        >
+                                            Save
+                                        </button>
+                                        <button
+                                            onClick={() => setEditingContact(false)}
+                                            className="py-2 px-4 rounded-lg bg-gray-200 text-gray-700 text-sm font-semibold"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-bold text-gray-900">{name}</p>
+                                        <p className="text-xs text-gray-500">📱 {phone}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => { setEditName(name); setEditPhone(phone); setEditingContact(true) }}
+                                        className="text-xs text-[#023430] font-bold px-3 py-1.5 rounded-lg bg-white border border-gray-200"
+                                    >
+                                        Change Contact
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         {/* Address Book UI */}
