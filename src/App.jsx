@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { CartProvider } from './context/CartContext'
 import { Toaster, toast } from 'sonner'
 import { lazy, Suspense, useEffect, useState } from 'react'
-import CustomerOnboarding from './components/CustomerOnboarding'
 
 // --- NEW IMPORTS FOR PUSH NOTIFICATIONS ---
 import { PushNotifications } from '@capacitor/push-notifications'
@@ -34,13 +33,6 @@ function LoadingScreen() {
 }
 
 function App() {
-    // For customer mode: show onboarding if no saved data
-    const [showOnboarding, setShowOnboarding] = useState(() => {
-        if (APP_MODE !== 'customer') return false
-        try {
-            return !localStorage.getItem('mrn_customer_data')
-        } catch { return false }
-    })
 
     const [updateRequired, setUpdateRequired] = useState(false)
 
@@ -203,10 +195,6 @@ function App() {
                 </div>
             )}
 
-            {/* Customer onboarding: shown once on first launch */}
-            {!updateRequired && showOnboarding && (
-                <CustomerOnboarding onComplete={() => setShowOnboarding(false)} />
-            )}
             <Router>
                 <Toaster
                     position="top-center"
