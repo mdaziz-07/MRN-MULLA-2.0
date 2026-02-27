@@ -132,17 +132,6 @@ export default function Home() {
     const [products, setProducts] = useState(PRODUCTS)
     const [showAppPrompt, setShowAppPrompt] = useState(false)
 
-    // Dismiss app banner on web
-    useEffect(() => {
-        if (typeof window !== 'undefined' && Capacitor.getPlatform() === 'web') {
-            const dismissed = localStorage.getItem('hideAppBanner')
-            if (!dismissed) {
-                const t = setTimeout(() => setShowAppPrompt(true), 1500)
-                return () => clearTimeout(t)
-            }
-        }
-    }, [])
-
     const dismissAppBanner = () => {
         localStorage.setItem('hideAppBanner', 'true')
         setShowAppPrompt(false)
@@ -232,6 +221,7 @@ export default function Home() {
 
     const handleDismissPrompt = () => {
         localStorage.setItem('hideAppPrompt', 'true')
+        setShowAppPrompt(false)
     }
 
     // Read shop status
@@ -388,12 +378,9 @@ export default function Home() {
     return (
         <div className="min-h-screen bg-gray-50 pb-32">
 
-            {/* ─── WEB-ONLY APK DOWNLOAD BANNER (fixed top) ─── */}
+            {/* ─── WEB-ONLY APK DOWNLOAD BANNER (static, top of page, not shown in app) ─── */}
             {Capacitor.getPlatform() === 'web' && (
-                <div
-                    style={{ zIndex: 9999 }}
-                    className="fixed top-0 left-0 right-0 bg-[#E0A75E] text-[#023430] px-4 py-2 flex items-center justify-between shadow-md gap-2"
-                >
+                <div className="w-full bg-[#E0A75E] text-[#023430] px-4 py-2 flex items-center justify-between shadow-md gap-2">
                     <div className="flex items-center gap-2 shrink-0">
                         <Download size={16} className="animate-bounce" />
                         <span className="text-xs font-black uppercase tracking-wider">Get the App!</span>
