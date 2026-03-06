@@ -274,8 +274,8 @@ export default function ProductsTab({ selectedCategory: parentCategory, setSelec
             ) : (
                 <div className="text-center py-12">
                     <div className="text-4xl mb-3">📦</div>
-                    <p className="font-semibold text-[#1A1A1A]">No products</p>
-                    <p className="text-sm text-[#757575]">Add products to this category</p>
+                    <p className="font-semibold text-text-primary">No products</p>
+                    <p className="text-sm text-text-secondary">Add products to this category</p>
                 </div>
             )}
 
@@ -390,11 +390,11 @@ function ProductFormModal({ product, categories, defaultCategory, scannedBarcode
                 className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-scaleIn"
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="sticky top-0 bg-white px-5 py-4 border-b border-[#E0E0E0] flex items-center justify-between z-10">
-                    <h2 className="text-lg font-bold text-[#1A1A1A]">
+                <div className="sticky top-0 bg-white px-5 py-4 border-b border-border flex items-center justify-between z-10">
+                    <h2 className="text-lg font-bold text-text-primary">
                         {product ? 'Update Product' : 'Add New Product'}
                     </h2>
-                    <button onClick={onClose} className="p-1 hover:bg-[#F5F5F5] rounded-full">
+                    <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-full">
                         <X size={20} />
                     </button>
                 </div>
@@ -413,7 +413,7 @@ function ProductFormModal({ product, categories, defaultCategory, scannedBarcode
 
                     {/* Multiple Images */}
                     <div>
-                        <label className="text-xs font-semibold text-[#757575] uppercase tracking-wider mb-1.5 block">
+                        <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1.5 block">
                             Product Images ({images.length})
                         </label>
 
@@ -468,10 +468,10 @@ function ProductFormModal({ product, categories, defaultCategory, scannedBarcode
                         <label className="
                             flex items-center justify-center gap-2
                             py-2.5 rounded-lg
-                            border-2 border-dashed border-[#E0E0E0]
-                            text-sm text-[#757575]
+                            border-2 border-dashed border-border
+                            text-sm text-text-secondary
                             cursor-pointer
-                            hover:border-[#023430] hover:text-[#023430]
+                            hover:border-primary-dark hover:text-primary-dark
                             transition-colors
                         ">
                             <Upload size={16} />
@@ -482,7 +482,7 @@ function ProductFormModal({ product, categories, defaultCategory, scannedBarcode
 
                     {/* Name */}
                     <div>
-                        <label className="text-xs font-semibold text-[#757575] uppercase tracking-wider mb-1.5 block">
+                        <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1.5 block">
                             Product Name *
                         </label>
                         <input
@@ -497,7 +497,7 @@ function ProductFormModal({ product, categories, defaultCategory, scannedBarcode
 
                     {/* Category */}
                     <div>
-                        <label className="text-xs font-semibold text-[#757575] uppercase tracking-wider mb-1.5 block">
+                        <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1.5 block">
                             Category *
                         </label>
                         <select
@@ -514,7 +514,7 @@ function ProductFormModal({ product, categories, defaultCategory, scannedBarcode
                     {/* Price Row */}
                     <div className="grid grid-cols-2 gap-3">
                         <div>
-                            <label className="text-xs font-semibold text-[#757575] uppercase tracking-wider mb-1.5 block">
+                            <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1.5 block">
                                 Selling Price *
                             </label>
                             <input
@@ -527,7 +527,7 @@ function ProductFormModal({ product, categories, defaultCategory, scannedBarcode
                             />
                         </div>
                         <div>
-                            <label className="text-xs font-semibold text-[#757575] uppercase tracking-wider mb-1.5 block">
+                            <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1.5 block">
                                 MRP
                             </label>
                             <input
@@ -543,7 +543,7 @@ function ProductFormModal({ product, categories, defaultCategory, scannedBarcode
                     {/* Pack Size & Unit */}
                     <div className="grid grid-cols-3 gap-3">
                         <div className="col-span-2">
-                            <label className="text-xs font-semibold text-[#757575] uppercase tracking-wider mb-1.5 block">
+                            <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1.5 block">
                                 Pack Size
                             </label>
                             <input
@@ -555,7 +555,7 @@ function ProductFormModal({ product, categories, defaultCategory, scannedBarcode
                             />
                         </div>
                         <div>
-                            <label className="text-xs font-semibold text-[#757575] uppercase tracking-wider mb-1.5 block">
+                            <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1.5 block">
                                 Unit
                             </label>
                             <select
@@ -572,7 +572,7 @@ function ProductFormModal({ product, categories, defaultCategory, scannedBarcode
 
                     {/* Stock */}
                     <div>
-                        <label className="text-xs font-semibold text-[#757575] uppercase tracking-wider mb-1.5 block">
+                        <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1.5 block">
                             Stock Quantity
                         </label>
                         <input
@@ -587,7 +587,7 @@ function ProductFormModal({ product, categories, defaultCategory, scannedBarcode
                     {/* Barcode (if not already shown) */}
                     {!scannedBarcode && (
                         <div>
-                            <label className="text-xs font-semibold text-[#757575] uppercase tracking-wider mb-1.5 block">
+                            <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1.5 block">
                                 Barcode
                             </label>
                             <input
@@ -602,7 +602,7 @@ function ProductFormModal({ product, categories, defaultCategory, scannedBarcode
 
                     {/* Description */}
                     <div>
-                        <label className="text-xs font-semibold text-[#757575] uppercase tracking-wider mb-1.5 block">
+                        <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1.5 block">
                             Description
                         </label>
                         <textarea
@@ -619,7 +619,7 @@ function ProductFormModal({ product, categories, defaultCategory, scannedBarcode
                         disabled={uploading}
                         className="
                             w-full py-3.5 rounded-xl
-                            bg-[#023430] text-white
+                            bg-primary-dark text-white
                             font-bold text-base
                             active:scale-[0.98] transition-transform
                             shadow-lg disabled:opacity-50

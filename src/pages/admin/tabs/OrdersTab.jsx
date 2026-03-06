@@ -350,7 +350,7 @@ export default function OrdersTab() {
                     </div>
                     <button
                         onClick={fetchOrders}
-                        className="bg-[#023430] text-white px-3 rounded-xl text-xs font-bold shadow hover:bg-green-900 transition-colors flex items-center justify-center shrink-0"
+                        className="bg-primary-dark text-white px-3 rounded-xl text-xs font-bold shadow hover:bg-green-900 transition-colors flex items-center justify-center shrink-0"
                     >
                         {loading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={16} />}
                     </button>
@@ -372,13 +372,13 @@ export default function OrdersTab() {
                             }`}
                     >
                         <p className="text-xl sm:text-2xl font-extrabold" style={{ color: stat.color }}>{stat.value}</p>
-                        <p className="text-[9px] sm:text-[10px] font-semibold text-[#757575] uppercase">{stat.label}</p>
+                        <p className="text-[9px] sm:text-[10px] font-semibold text-text-secondary uppercase">{stat.label}</p>
                     </button>
                 ))}
             </div>
 
             {/* Revenue Card */}
-            <div className="bg-[#023430] text-white rounded-xl p-3 sm:p-4 flex items-center justify-between">
+            <div className="bg-primary-dark text-white rounded-xl p-3 sm:p-4 flex items-center justify-between">
                 <div>
                     <p className="text-[10px] sm:text-xs text-white/60 font-semibold uppercase">Today's Revenue</p>
                     <p className="text-2xl sm:text-3xl font-extrabold">₹{stats.totalRevenue.toLocaleString()}</p>
@@ -612,7 +612,7 @@ export default function OrdersTab() {
                                             updateStatus(selectedOrder.id, next)
                                             setSelectedOrder(null)
                                         }}
-                                        className="flex-1 bg-[#023430] text-white py-3 rounded-xl font-bold text-sm hover:bg-green-900 transition-colors shadow-lg"
+                                        className="flex-1 bg-primary-dark text-white py-3 rounded-xl font-bold text-sm hover:bg-green-900 transition-colors shadow-lg"
                                     >
                                         {selectedOrder.status === 'Received' ? 'Dispatch Order' : 'Complete Delivery'}
                                     </button>

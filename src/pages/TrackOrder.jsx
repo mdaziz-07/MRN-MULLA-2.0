@@ -257,7 +257,7 @@ export default function TrackOrder() {
         return (
             <div className="min-h-screen bg-white flex items-center justify-center">
                 <div className="text-center">
-                    <div className="w-12 h-12 border-3 border-gray-200 border-t-[#023430] rounded-full animate-spin mx-auto mb-4" />
+                    <div className="w-12 h-12 border-3 border-gray-200 border-t-primary-dark rounded-full animate-spin mx-auto mb-4" />
                     <p className="text-gray-400 text-sm font-medium">Loading...</p>
                 </div>
             </div>
@@ -286,13 +286,13 @@ export default function TrackOrder() {
                         value={mobileInput}
                         onChange={(e) => setMobileInput(e.target.value.replace(/\D/g, '').slice(0, 10))}
                         maxLength={10}
-                        className="w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 text-center text-lg font-semibold tracking-widest focus:border-[#023430] focus:outline-none transition-colors mb-4"
+                        className="w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 text-center text-lg font-semibold tracking-widest focus:border-primary-dark focus:outline-none transition-colors mb-4"
                     />
 
                     <button
                         onClick={handleMobileSubmit}
                         disabled={mobileInput.length < 10}
-                        className="w-full py-3.5 rounded-xl bg-[#023430] text-white font-bold text-base disabled:bg-gray-300 disabled:cursor-not-allowed active:scale-95 transition-transform"
+                        className="w-full py-3.5 rounded-xl bg-primary-dark text-white font-bold text-base disabled:bg-gray-300 disabled:cursor-not-allowed active:scale-95 transition-transform"
                     >
                         <Search size={16} className="inline mr-2" />
                         View My Orders
@@ -334,7 +334,7 @@ export default function TrackOrder() {
                     <button
                         onClick={() => setFilterPeriod('today')}
                         className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${filterPeriod === 'today'
-                            ? 'bg-[#1A1A1A] text-white'
+                            ? 'bg-text-primary text-white'
                             : 'text-gray-500 hover:bg-gray-100'
                             }`}
                     >
@@ -343,7 +343,7 @@ export default function TrackOrder() {
                     <button
                         onClick={() => setFilterPeriod('all')}
                         className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${filterPeriod === 'all'
-                            ? 'bg-[#1A1A1A] text-white'
+                            ? 'bg-text-primary text-white'
                             : 'text-gray-500 hover:bg-gray-100'
                             }`}
                     >
@@ -420,7 +420,7 @@ export default function TrackOrder() {
                                     {/* Total */}
                                     <div className="flex justify-between items-center pt-3 border-t border-gray-100 mb-3">
                                         <span className="text-sm text-gray-500 font-medium">Total Amount</span>
-                                        <span className="text-lg font-black text-[#023430]">₹{o.total_amount}</span>
+                                        <span className="text-lg font-black text-primary-dark">₹{o.total_amount}</span>
                                     </div>
 
                                     {/* Actions */}
@@ -431,7 +431,7 @@ export default function TrackOrder() {
                                                 handleReorder(o)
                                             }}
                                             disabled={isReordering}
-                                            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-white border-2 border-[#023430] text-[#023430] font-bold text-sm hover:bg-gray-50 active:scale-95 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                                            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-white border-2 border-primary-dark text-primary-dark font-bold text-sm hover:bg-gray-50 active:scale-95 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                                         >
                                             <RefreshCw size={14} className={isReordering ? 'animate-spin' : ''} />
                                             {isReordering ? 'Wait...' : 'Reorder'}
@@ -439,7 +439,7 @@ export default function TrackOrder() {
                                         {o.status !== 'Delivered' && (
                                             <button
                                                 onClick={() => navigate(`/track/${o.id}`)}
-                                                className="flex-1 py-2.5 rounded-xl bg-[#023430] text-white font-bold text-sm active:scale-95 transition-transform text-center shadow-sm"
+                                                className="flex-1 py-2.5 rounded-xl bg-primary-dark text-white font-bold text-sm active:scale-95 transition-transform text-center shadow-sm"
                                             >
                                                 Track
                                             </button>
@@ -461,7 +461,7 @@ export default function TrackOrder() {
                 <div className="text-center">
                     <div className="text-5xl mb-4">📦</div>
                     <h2 className="text-xl font-bold mb-2">Order not found</h2>
-                    <button onClick={() => navigate('/')} className="text-[#023430] font-semibold underline">
+                    <button onClick={() => navigate('/')} className="text-primary-dark font-semibold underline">
                         Go Home
                     </button>
                 </div>
@@ -475,7 +475,7 @@ export default function TrackOrder() {
     return (
         <div className="min-h-screen bg-[#F5F5F5]">
             {/* ─── Header ─── */}
-            <header className="bg-[#023430] text-white px-4 py-4 safe-area-top flex items-center justify-between">
+            <header className="bg-primary-dark text-white px-4 py-4 safe-area-top flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <button onClick={() => navigate('/orders')} className="active:scale-90 transition-transform">
                         <ChevronLeft size={24} />
@@ -520,13 +520,13 @@ export default function TrackOrder() {
             </header>
 
             {/* ─── Status Hero ─── */}
-            <div className="bg-[#023430] text-white px-6 pb-8 pt-4 text-center">
+            <div className="bg-primary-dark text-white px-6 pb-8 pt-4 text-center">
                 <div className={`
                     w-20 h-20 rounded-full mx-auto mb-4
                     flex items-center justify-center
                     ${order.status === 'Delivered' ? 'bg-[#00C853]' :
-                        order.status === 'Out for Delivery' ? 'bg-[#2196F3] animate-pulse' :
-                            'bg-[#FFC107]'}
+                        order.status === 'Out for Delivery' ? 'bg-status-out animate-pulse' :
+                            'bg-status-pending'}
                     shadow-[0_0_30px_rgba(255,255,255,0.15)]
                 `}>
                     <StatusIcon size={36} className="text-white" />
@@ -550,14 +550,14 @@ export default function TrackOrder() {
 
             {/* ─── Status Timeline ─── */}
             <div className="bg-white p-6 -mt-2 rounded-t-3xl relative z-10">
-                <h3 className="text-sm font-semibold text-[#757575] uppercase tracking-wider mb-5">
+                <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-5">
                     Order Timeline
                 </h3>
 
                 <div className="relative space-y-7 ml-3">
-                    <div className="absolute left-[7px] top-2 bottom-2 w-[2px] bg-[#E0E0E0]" />
+                    <div className="absolute left-[7px] top-2 bottom-2 w-[2px] bg-border" />
                     <div
-                        className={`absolute left-[7px] top-2 w-[2px] bg-gradient-to-b from-[#00C853] to-[#00C853] transition-all duration-700 ${order.status === 'Delivered' ? 'bottom-2' : ''}`}
+                        className={`absolute left-[7px] top-2 w-[2px] bg-linear-to-b from-[#00C853] to-[#00C853] transition-all duration-700 ${order.status === 'Delivered' ? 'bottom-2' : ''}`}
                         style={{ height: order.status === 'Delivered' ? 'auto' : `${Math.max(0, currentStatusIndex) * 33.33}%` }}
                     />
 
@@ -570,17 +570,17 @@ export default function TrackOrder() {
                             <div key={status} className="flex items-start gap-4 relative">
                                 <div className={`
                                     w-4 h-4 rounded-full z-10 flex items-center justify-center transition-all duration-500
-                                    ${isCompleted ? 'bg-[#00C853] shadow-[0_0_8px_rgba(0,200,83,0.4)]' : 'bg-[#E0E0E0]'}
+                                    ${isCompleted ? 'bg-[#00C853] shadow-[0_0_8px_rgba(0,200,83,0.4)]' : 'bg-border'}
                                     ${isCurrent ? 'ring-4 ring-[#00C853]/20 scale-125' : ''}
                                 `}>
                                     {isCompleted && <Check size={10} className="text-white" />}
                                 </div>
 
                                 <div className="flex-1 -mt-0.5">
-                                    <p className={`font-semibold text-[15px] ${isCurrent ? 'text-[#023430]' : isCompleted ? 'text-[#1A1A1A]' : 'text-[#BDBDBD]'}`}>
+                                    <p className={`font-semibold text-[15px] ${isCurrent ? 'text-primary-dark' : isCompleted ? 'text-text-primary' : 'text-text-light'}`}>
                                         {config.label}
                                     </p>
-                                    <p className={`text-xs mt-0.5 ${isCompleted ? 'text-[#757575]' : 'text-[#BDBDBD]'}`}>
+                                    <p className={`text-xs mt-0.5 ${isCompleted ? 'text-text-secondary' : 'text-text-light'}`}>
                                         {isCompleted
                                             ? new Date(order.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
                                             : isCurrent && order.status !== 'Delivered' ? 'In progress...' : 'Pending'}
@@ -594,7 +594,7 @@ export default function TrackOrder() {
 
             {/* ─── Order Details ─── */}
             <div className="bg-white p-6 mt-2">
-                <h3 className="text-sm font-semibold text-[#757575] uppercase tracking-wider mb-4">
+                <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
                     Order Details
                 </h3>
 
@@ -609,17 +609,17 @@ export default function TrackOrder() {
                                 )}
                             </div>
                             <div className="flex-1">
-                                <p className="text-sm font-medium text-[#1A1A1A]">{item.name}</p>
-                                <p className="text-[11px] text-[#757575]">{item.pack_size} {item.unit} × {item.qty}</p>
+                                <p className="text-sm font-medium text-text-primary">{item.name}</p>
+                                <p className="text-[11px] text-text-secondary">{item.pack_size} {item.unit} × {item.qty}</p>
                             </div>
-                            <span className="text-sm font-bold text-[#023430]">₹{item.price * item.qty}</span>
+                            <span className="text-sm font-bold text-primary-dark">₹{item.price * item.qty}</span>
                         </div>
                     ))}
                 </div>
 
-                <div className="border-t border-[#E0E0E0] pt-3 space-y-2">
+                <div className="border-t border-border pt-3 space-y-2">
                     <div className="flex justify-between text-sm">
-                        <span className="text-[#757575]">Payment</span>
+                        <span className="text-text-secondary">Payment</span>
                         <span className="font-medium">
                             {order.payment_method}
                             {order.payment_status === 'Paid' && (
@@ -627,9 +627,9 @@ export default function TrackOrder() {
                             )}
                         </span>
                     </div>
-                    <div className="flex justify-between text-lg font-bold pt-2 border-t border-[#E0E0E0]">
+                    <div className="flex justify-between text-lg font-bold pt-2 border-t border-border">
                         <span>Total</span>
-                        <span className="text-[#023430]">₹{order.total_amount}</span>
+                        <span className="text-primary-dark">₹{order.total_amount}</span>
                     </div>
                 </div>
             </div>
@@ -638,7 +638,7 @@ export default function TrackOrder() {
             <div className="p-4 flex gap-3 pb-[calc(env(safe-area-inset-bottom)+2rem)]">
                 <a
                     href={`tel:${STORE_PHONE}`}
-                    className="flex-1 flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl bg-white border-2 border-[#023430] text-[#023430] font-semibold active:scale-95 transition-transform shadow-sm"
+                    className="flex-1 flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl bg-white border-2 border-primary-dark text-primary-dark font-semibold active:scale-95 transition-transform shadow-sm"
                 >
                     <Phone size={18} />
                     Call Store

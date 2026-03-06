@@ -223,7 +223,7 @@ export default function PrintRequestsTab() {
                                     <>
                                         <button
                                             onClick={() => updateStatus(req.id, 'accepted')}
-                                            className="bg-[#023430] text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1"
+                                            className="bg-primary-dark text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1"
                                         >
                                             <Check size={12} /> Accept
                                         </button>

@@ -80,7 +80,7 @@ export default function CustomerOnboarding({ onComplete }) {
     }
 
     return (
-        <div className="fixed inset-0 z-[9999] bg-[#023430] flex flex-col items-center justify-center p-6">
+        <div className="fixed inset-0 z-9999 bg-primary-dark flex flex-col items-center justify-center p-6">
             {/* Logo / Icon */}
             <div className="mb-8 text-center">
                 <div className="w-20 h-20 bg-white/10 rounded-3xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm border border-white/20">
@@ -106,7 +106,7 @@ export default function CustomerOnboarding({ onComplete }) {
                             placeholder="Your full name"
                             value={name}
                             onChange={(e) => { setName(e.target.value); setError('') }}
-                            className="w-full pl-10 pr-4 py-3.5 rounded-xl border border-gray-200 text-sm font-medium outline-none focus:border-[#023430] focus:ring-1 focus:ring-[#023430]/30 transition-colors"
+                            className="w-full pl-10 pr-4 py-3.5 rounded-xl border border-gray-200 text-sm font-medium outline-none focus:border-primary-dark focus:ring-1 focus:ring-primary-dark/30 transition-colors"
                             autoComplete="name"
                         />
                     </div>
@@ -121,7 +121,7 @@ export default function CustomerOnboarding({ onComplete }) {
                             placeholder="10-digit mobile number"
                             value={phone}
                             onChange={(e) => { setPhone(e.target.value.replace(/\D/g, '').slice(0, 10)); setError('') }}
-                            className="w-full pl-10 pr-4 py-3.5 rounded-xl border border-gray-200 text-sm font-medium outline-none focus:border-[#023430] focus:ring-1 focus:ring-[#023430]/30 transition-colors"
+                            className="w-full pl-10 pr-4 py-3.5 rounded-xl border border-gray-200 text-sm font-medium outline-none focus:border-primary-dark focus:ring-1 focus:ring-primary-dark/30 transition-colors"
                             inputMode="numeric"
                             maxLength={10}
                         />
@@ -134,7 +134,7 @@ export default function CustomerOnboarding({ onComplete }) {
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full bg-[#023430] text-white py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
+                        className="w-full bg-primary-dark text-white py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
                     >
                         {isLoading ? (
                             <>

@@ -111,7 +111,7 @@ export default function BundlesTab() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                 <div>
                     <h1 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-                        <Package className="text-[#023430]" /> Product Bundles
+                        <Package className="text-primary-dark" /> Product Bundles
                     </h1>
                     <p className="text-sm text-gray-500 mt-1">
                         Group items together to show as "Frequently Bought Together" suggestions at checkout.
@@ -120,7 +120,7 @@ export default function BundlesTab() {
                 {!isCreating && (
                     <button
                         onClick={() => setIsCreating(true)}
-                        className="flex items-center gap-2 bg-[#023430] text-white px-5 py-2.5 rounded-xl font-bold hover:scale-105 active:scale-95 transition-all shadow-md"
+                        className="flex items-center gap-2 bg-primary-dark text-white px-5 py-2.5 rounded-xl font-bold hover:scale-105 active:scale-95 transition-all shadow-md"
                     >
                         <Plus size={18} /> Create Bundle
                     </button>
@@ -129,7 +129,7 @@ export default function BundlesTab() {
 
             {/* Creation Form */}
             {isCreating && (
-                <div className="bg-white p-6 rounded-3xl shadow-sm border border-[#023430]/20 flex flex-col animate-slideUp">
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-primary-dark/20 flex flex-col animate-slideUp">
 
                     <div className="mb-4 shrink-0">
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Bundle Name</label>
@@ -138,7 +138,7 @@ export default function BundlesTab() {
                             value={bundleName}
                             onChange={(e) => setBundleName(e.target.value)}
                             placeholder="e.g. Breakfast Combo, Monthly Groceries"
-                            className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 focus:border-[#023430] focus:ring-0 outline-none transition-colors font-medium"
+                            className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 focus:border-primary-dark focus:ring-0 outline-none transition-colors font-medium"
                         />
                     </div>
 
@@ -178,7 +178,7 @@ export default function BundlesTab() {
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="Search products..."
-                                className="w-full pl-9 pr-4 py-2 bg-gray-50 rounded-lg text-sm outline-none border border-gray-200 focus:border-[#023430]"
+                                className="w-full pl-9 pr-4 py-2 bg-gray-50 rounded-lg text-sm outline-none border border-gray-200 focus:border-primary-dark"
                             />
                         </div>
                     </div>
@@ -198,13 +198,13 @@ export default function BundlesTab() {
                                         type="checkbox"
                                         checked={isSelected}
                                         readOnly
-                                        className="w-4 h-4 text-[#023430] rounded"
+                                        className="w-4 h-4 text-primary-dark rounded"
                                     />
                                     <div className="w-10 h-10 bg-white rounded flex items-center justify-center p-1 shrink-0">
                                         <img src={product.image_url} alt="" className="w-full h-full object-contain mix-blend-multiply" />
                                     </div>
                                     <div className="flex-1 min-w-0 pr-1">
-                                        <p className="text-sm font-bold text-gray-900 break-words leading-tight line-clamp-2 mb-0.5">{product.name}</p>
+                                        <p className="text-sm font-bold text-gray-900 wrap-break-word leading-tight line-clamp-2 mb-0.5">{product.name}</p>
                                         <p className="text-[10px] text-gray-500 uppercase">{product.category} • ₹{product.price}</p>
                                     </div>
                                 </div>
@@ -229,7 +229,7 @@ export default function BundlesTab() {
                         <button
                             onClick={handleCreateBundle}
                             disabled={loading || selectedProducts.length < 2 || !bundleName}
-                            className="px-5 py-2.5 rounded-xl font-bold text-white bg-[#023430] hover:bg-[#034540] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="px-5 py-2.5 rounded-xl font-bold text-white bg-primary-dark hover:bg-[#034540] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         >
                             {loading ? <RefreshCw size={18} className="animate-spin" /> : <Save size={18} />}
                             Save Bundle

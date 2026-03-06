@@ -59,7 +59,7 @@ export default function ProductModal({ product, onClose, isInCart, qty, onAdd, o
                 </button>
 
                 {/* Image Section */}
-                <div className="relative bg-gradient-to-b from-gray-50 to-white flex items-center justify-center shrink-0 w-full"
+                <div className="relative bg-linear-to-b from-gray-50 to-white flex items-center justify-center shrink-0 w-full"
                     style={{ minHeight: '300px' }}
                 >
                     {images.length > 0 ? (
@@ -95,7 +95,7 @@ export default function ProductModal({ product, onClose, isInCart, qty, onAdd, o
                                         {images.map((_, idx) => (
                                             <div
                                                 key={idx}
-                                                className={`w-1.5 h-1.5 rounded-full transition-all ${idx === activeImage ? 'bg-[#023430] w-3' : 'bg-gray-300'
+                                                className={`w-1.5 h-1.5 rounded-full transition-all ${idx === activeImage ? 'bg-primary-dark w-3' : 'bg-gray-300'
                                                     }`}
                                             />
                                         ))}
@@ -139,7 +139,7 @@ export default function ProductModal({ product, onClose, isInCart, qty, onAdd, o
                     {/* Price & Cart Action */}
                     <div className="flex items-center justify-between">
                         <div>
-                            <span className="text-3xl font-black text-[#023430]">₹{product.price}</span>
+                            <span className="text-3xl font-black text-primary-dark">₹{product.price}</span>
                             {product.mrp && product.mrp > product.price && (
                                 <span className="text-base text-gray-300 line-through ml-2 font-medium">₹{product.mrp}</span>
                             )}
@@ -149,7 +149,7 @@ export default function ProductModal({ product, onClose, isInCart, qty, onAdd, o
                             {!isInCart ? (
                                 <button
                                     onClick={() => onAdd(product)}
-                                    className="w-full bg-[#023430] text-white py-3.5 rounded-2xl font-bold text-sm shadow-lg hover:bg-[#034d45] active:scale-95 transition-all flex items-center justify-center gap-2"
+                                    className="w-full bg-primary-dark text-white py-3.5 rounded-2xl font-bold text-sm shadow-lg hover:bg-[#034d45] active:scale-95 transition-all flex items-center justify-center gap-2"
                                 >
                                     <Plus size={18} />
                                     Add to Cart
@@ -165,7 +165,7 @@ export default function ProductModal({ product, onClose, isInCart, qty, onAdd, o
                                     <span className="text-xl font-black text-gray-900 min-w-[30px] text-center">{qty}</span>
                                     <button
                                         onClick={() => onIncrement(product.id)}
-                                        className="w-9 h-9 flex items-center justify-center bg-[#023430] text-white rounded-full shadow-sm hover:bg-[#034d45] transition-colors"
+                                        className="w-9 h-9 flex items-center justify-center bg-primary-dark text-white rounded-full shadow-sm hover:bg-[#034d45] transition-colors"
                                     >
                                         <Plus size={16} />
                                     </button>

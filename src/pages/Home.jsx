@@ -59,7 +59,7 @@ const ProductCard = memo(function ProductCard({ product, isInCart, qty, onAdd, o
                 <div className="text-base font-bold text-black mb-2">
                     ₹{product.price}
                     {product.mrp && product.mrp > product.price && (
-                        <span className="text-xs text-[#BDBDBD] line-through ml-1">₹{product.mrp}</span>
+                        <span className="text-xs text-text-light line-through ml-1">₹{product.mrp}</span>
                     )}
                 </div>
 
@@ -67,32 +67,32 @@ const ProductCard = memo(function ProductCard({ product, isInCart, qty, onAdd, o
                     <button
                         onClick={() => onAdd(product)}
                         className="
-                            w-full bg-[#023430] text-white
+                            w-full bg-primary-dark text-white
                             py-1.5 rounded-lg
                             font-bold
-                            hover:bg-[#024a3b] transition-colors
+                            hover:bg-[#024a3b]
                             flex items-center justify-center
-                            active:scale-95 transition-transform
+                            active:scale-95 transition
                         "
                         aria-label={`Add ${product.name} to cart`}
                     >
                         <Plus size={16} />
                     </button>
                 ) : (
-                    <div className="flex items-center justify-between bg-white border border-[#023430] rounded-lg h-7 px-1">
+                    <div className="flex items-center justify-between bg-white border border-primary-dark rounded-lg h-7 px-1">
                         <button
                             onClick={() => onDecrement(product.id)}
-                            className="text-[#023430]"
+                            className="text-primary-dark"
                             aria-label="Decrease quantity"
                         >
                             <Minus size={14} />
                         </button>
-                        <span className="text-xs font-bold text-[#023430]">
+                        <span className="text-xs font-bold text-primary-dark">
                             {qty}
                         </span>
                         <button
                             onClick={() => onIncrement(product.id)}
-                            className="text-[#023430]"
+                            className="text-primary-dark"
                             aria-label="Increase quantity"
                         >
                             <Plus size={14} />
@@ -380,14 +380,14 @@ export default function Home() {
 
             {/* ─── WEB-ONLY APK DOWNLOAD BANNER (static, top of page, not shown in app) ─── */}
             {Capacitor.getPlatform() === 'web' && (
-                <div className="w-full bg-[#E0A75E] text-[#023430] px-4 py-2 flex items-center justify-between shadow-md gap-2">
+                <div className="w-full bg-[#E0A75E] text-primary-dark px-4 py-2 flex items-center justify-between shadow-md gap-2">
                     <div className="flex items-center gap-2 shrink-0">
                         <Download size={16} className="animate-bounce" />
                         <span className="text-xs font-black uppercase tracking-wider">Get the App!</span>
                     </div>
                     <a
                         href="https://github.com/mdaziz-07/MRN-Mulla-Kirana-APK/releases/latest/download/MRN.Mulla.Kirana.apk"
-                        className="bg-[#023430] text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-sm active:scale-95 transition-transform"
+                        className="bg-primary-dark text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-sm active:scale-95 transition-transform"
                     >
                         Download
                     </a>
@@ -395,7 +395,7 @@ export default function Home() {
             )}
 
             {/* ─── HEADER ─── */}
-            <div className="bg-[#023430] text-white pt-[calc(env(safe-area-inset-top)+1.2rem)] pb-3 px-5 relative z-10">
+            <div className="bg-primary-dark text-white pt-[calc(env(safe-area-inset-top)+1.2rem)] pb-3 px-5 relative z-10">
                 <div className="flex justify-between items-start mb-3">
                     <div>
                         <h1 className="text-xl font-black tracking-wide uppercase">
@@ -436,7 +436,7 @@ export default function Home() {
             </div>
 
             {/* ─── SEARCH BAR — sticky with safe-area header protector ─── */}
-            <div className={`sticky top-0 z-50 px-4 pb-3 transition-all duration-300 bg-[#023430] rounded-b-2xl ${scrolled ? 'pt-[calc(env(safe-area-inset-top)+0.75rem)] shadow-lg' : 'pt-2 shadow-md'}`}>
+            <div className={`sticky top-0 z-50 px-4 pb-3 bg-primary-dark rounded-b-2xl ${scrolled ? 'pt-[calc(env(safe-area-inset-top)+0.75rem)] shadow-lg' : 'pt-2 shadow-md'}`}>
                 <div className="relative">
                     <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
@@ -497,7 +497,7 @@ export default function Home() {
             <main className="px-3 pb-6">
                 {/* Section Title — always show count */}
                 <div className="flex items-center justify-between mb-3 px-1">
-                    <h2 className="text-lg font-bold text-[#1A1A1A]">
+                    <h2 className="text-lg font-bold text-text-primary">
                         {selectedCategory === 'All' ? 'All Products' : selectedCategory}
                     </h2>
                     <span className="bg-gray-100 text-gray-500 text-[11px] font-bold px-2.5 py-1 rounded-full">
@@ -507,9 +507,9 @@ export default function Home() {
 
                 {searchQuery && (
                     <div className="mb-3 px-1">
-                        <p className="text-sm text-[#757575]">
-                            Showing results for &ldquo;<span className="font-semibold text-[#1A1A1A]">{searchQuery}</span>&rdquo;
-                            <span className="ml-2 text-[#BDBDBD]">({filteredProducts.length})</span>
+                        <p className="text-sm text-text-secondary">
+                            Showing results for &ldquo;<span className="font-semibold text-text-primary">{searchQuery}</span>&rdquo;
+                            <span className="ml-2 text-text-light">({filteredProducts.length})</span>
                         </p>
                     </div>
                 )}
@@ -532,8 +532,8 @@ export default function Home() {
                 ) : (
                     <div className="text-center py-16">
                         <div className="text-5xl mb-4">🔍</div>
-                        <p className="text-lg font-semibold text-[#1A1A1A] mb-1">No products found</p>
-                        <p className="text-sm text-[#757575]">Try a different search or category</p>
+                        <p className="text-lg font-semibold text-text-primary mb-1">No products found</p>
+                        <p className="text-sm text-text-secondary">Try a different search or category</p>
                     </div>
                 )}
             </main>
@@ -597,7 +597,7 @@ export default function Home() {
 
             {/* ─── APP DOWNLOAD PROMPT (Web Only) ─── */}
             {showAppPrompt && (
-                <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+                <div className="fixed inset-0 z-100 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
                     <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl animate-scaleIn relative">
                         {/* Close button top right */}
                         <button
@@ -608,20 +608,20 @@ export default function Home() {
                         </button>
 
                         {/* Header Image Area */}
-                        <div className="bg-[#023430] py-8 flex flex-col items-center justify-center relative overflow-hidden">
-                            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent"></div>
+                        <div className="bg-primary-dark py-8 flex flex-col items-center justify-center relative overflow-hidden">
+                            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-white to-transparent"></div>
                             <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg mb-3 relative z-10">
-                                <span className="text-2xl font-black text-[#023430]">M</span>
+                                <span className="text-2xl font-black text-primary-dark">M</span>
                             </div>
                             <h3 className="text-white font-bold text-lg relative z-10">MRN Mulla Kirana</h3>
                         </div>
 
                         {/* Content */}
                         <div className="p-6 text-center space-y-4">
-                            <h4 className="font-extrabold text-[#1A1A1A] text-xl">
+                            <h4 className="font-extrabold text-text-primary text-xl">
                                 For the Best Experience!
                             </h4>
-                            <p className="text-sm text-[#757575] leading-relaxed">
+                            <p className="text-sm text-text-secondary leading-relaxed">
                                 Get our Free Android App for faster ordering, real-time tracking, and exclusive offers.
                             </p>
 
@@ -639,14 +639,14 @@ export default function Home() {
                                         }
                                     }}
                                     href="#"
-                                    className="w-full flex items-center justify-center gap-2 bg-[#023430] text-white py-3.5 rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg hover:shadow-[#023430]/30"
+                                    className="w-full flex items-center justify-center gap-2 bg-primary-dark text-white py-3.5 rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg hover:shadow-primary-dark/30"
                                 >
                                     <Download size={20} />
                                     Download App
                                 </a>
                                 <button
                                     onClick={handleDismissPrompt}
-                                    className="w-full py-3 rounded-xl font-bold text-[#757575] hover:bg-gray-50 transition-colors"
+                                    className="w-full py-3 rounded-xl font-bold text-text-secondary hover:bg-gray-50 transition-colors"
                                 >
                                     Continue on Mobile Web
                                 </button>
@@ -658,11 +658,11 @@ export default function Home() {
 
             {/* ─── ADDRESS SELECTOR MODAL ─── */}
             {showAddressModal && (
-                <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center animate-fadeIn">
+                <div className="fixed inset-0 z-100 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center animate-fadeIn">
                     <div className="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-slideUp">
                         <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                             <h3 className="font-bold text-lg text-gray-900 flex items-center gap-2">
-                                <MapPin size={18} className="text-[#023430]" /> Select Delivery Address
+                                <MapPin size={18} className="text-primary-dark" /> Select Delivery Address
                             </h3>
                             <button onClick={() => setShowAddressModal(false)} className="p-2 bg-gray-100 rounded-full text-gray-500 hover:bg-gray-200">
                                 <X size={18} />
@@ -682,7 +682,7 @@ export default function Home() {
                                             setShowAddressModal(false)
                                             navigate('/checkout')
                                         }}
-                                        className="bg-[#023430] text-white px-6 py-2.5 rounded-xl font-bold text-sm"
+                                        className="bg-primary-dark text-white px-6 py-2.5 rounded-xl font-bold text-sm"
                                     >
                                         Go to Checkout
                                     </button>
@@ -694,7 +694,7 @@ export default function Home() {
                                         <div
                                             key={idx}
                                             onClick={() => handleSelectAddress(addr)}
-                                            className="p-4 border-2 border-gray-100 rounded-2xl cursor-pointer hover:border-[#023430] hover:bg-green-50/50 transition-all flex items-start gap-3"
+                                            className="p-4 border-2 border-gray-100 rounded-2xl cursor-pointer hover:border-primary-dark hover:bg-green-50/50 transition-all flex items-start gap-3"
                                         >
                                             <div className="mt-1 bg-gray-100 p-2 rounded-full text-gray-500">
                                                 <Map size={16} />
@@ -712,7 +712,7 @@ export default function Home() {
                                                 setShowAddressModal(false)
                                                 navigate('/checkout')
                                             }}
-                                            className="text-sm font-bold text-[#023430] flex items-center justify-center gap-1 w-full p-2"
+                                            className="text-sm font-bold text-primary-dark flex items-center justify-center gap-1 w-full p-2"
                                         >
                                             <Plus size={16} /> Add new address during checkout
                                         </button>
@@ -728,7 +728,7 @@ export default function Home() {
                                             setShowAddressModal(false)
                                             navigate('/checkout')
                                         }}
-                                        className="bg-[#023430] text-white px-6 py-2.5 rounded-xl font-bold text-sm"
+                                        className="bg-primary-dark text-white px-6 py-2.5 rounded-xl font-bold text-sm"
                                     >
                                         Go to Checkout
                                     </button>

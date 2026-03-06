@@ -24,22 +24,34 @@ serve(async (req: Request) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const productIds = cart.map((item: any) => item.id);
-
-    const { data: dbProducts, error: dbError } = await supabase
-      .from('products')
-      .select('id, price')
-      .in('id', productIds);
-
-    if (dbError) throw new Error("Database error: " + dbError.message);
+    const productIds = cart.map((item: any) => item.id)
+      .filter((id: any) => !isNaN(Number(id)));
 
     let totalAmount = 0;
-    cart.forEach((cartItem: any) => {
-      const dbProduct = dbProducts?.find((p: any) => p.id === cartItem.id);
-      // Use DB price if found, otherwise trust the price passed from the client
-      const unitPrice = dbProduct ? dbProduct.price : (cartItem.price || 0);
-      totalAmount += unitPrice * (cartItem.quantity || cartItem.qty || 1);
-    });
+
+    if (productIds.length > 0) {
+      const { data: dbProducts, error: dbError } = await supabase
+        .from('products')
+        .select('id, price')
+        .in('id', productIds);
+
+      if (dbError) throw new Error("Database error: " + dbError.message);
+
+      cart.forEach((cartItem: any) => {
+        // Skip non-numeric IDs (e.g. print items) — their cost is in deliveryFee
+        if (isNaN(Number(cartItem.id))) return;
+        const dbProduct = dbProducts?.find((p: any) => p.id === cartItem.id);
+        // Use DB price if found, otherwise trust the price passed from the client
+        const unitPrice = dbProduct ? dbProduct.price : (cartItem.price || 0);
+        totalAmount += unitPrice * (cartItem.quantity || cartItem.qty || 1);
+      });
+    } else {
+      // Cart only has non-product items (e.g. only print jobs)
+      cart.forEach((cartItem: any) => {
+        const unitPrice = cartItem.price || 0;
+        totalAmount += unitPrice * (cartItem.quantity || cartItem.qty || 1);
+      });
+    }
 
     totalAmount += deliveryFee;
 

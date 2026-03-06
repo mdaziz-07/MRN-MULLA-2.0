@@ -266,8 +266,8 @@ export default function PrintUpload() {
                         />
                     </div>
                 ) : (
-                    <div className="bg-[#023430]/5 border border-[#023430]/10 rounded-xl p-3 flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-[#023430] text-white flex items-center justify-center text-sm font-bold">
+                    <div className="bg-primary-dark/5 border border-primary-dark/10 rounded-xl p-3 flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-primary-dark text-white flex items-center justify-center text-sm font-bold">
                             {customerName.charAt(0).toUpperCase()}
                         </div>
                         <div>
@@ -327,11 +327,11 @@ export default function PrintUpload() {
                     <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
                         <div className="flex items-center justify-between mb-2">
                             <p className="text-xs font-bold text-gray-500">Uploading file {currentFileIndex + 1} of {files.length}...</p>
-                            <span className="text-xs font-bold text-[#023430]">{uploadProgress}%</span>
+                            <span className="text-xs font-bold text-primary-dark">{uploadProgress}%</span>
                         </div>
                         <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
                             <div
-                                className="h-full bg-gradient-to-r from-[#023430] to-[#046759] rounded-full transition-all duration-300"
+                                className="h-full bg-linear-to-r from-primary-dark to-primary-medium rounded-full transition-all duration-300"
                                 style={{ width: `${uploadProgress}%` }}
                             />
                         </div>
@@ -375,22 +375,22 @@ export default function PrintUpload() {
                             <button
                                 onClick={() => setOrientation('portrait')}
                                 className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${orientation === 'portrait'
-                                    ? 'border-[#023430] bg-green-50'
+                                    ? 'border-primary-dark bg-green-50'
                                     : 'border-transparent bg-gray-50 text-gray-500'
                                     }`}
                             >
-                                <div className={`w-6 h-8 border-2 rounded-sm mb-1 ${orientation === 'portrait' ? 'border-[#023430]' : 'border-gray-300'}`} />
-                                <span className={`text-xs font-bold ${orientation === 'portrait' ? 'text-[#023430]' : 'text-gray-600'}`}>Portrait</span>
+                                <div className={`w-6 h-8 border-2 rounded-sm mb-1 ${orientation === 'portrait' ? 'border-primary-dark' : 'border-gray-300'}`} />
+                                <span className={`text-xs font-bold ${orientation === 'portrait' ? 'text-primary-dark' : 'text-gray-600'}`}>Portrait</span>
                             </button>
                             <button
                                 onClick={() => setOrientation('landscape')}
                                 className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${orientation === 'landscape'
-                                    ? 'border-[#023430] bg-green-50'
+                                    ? 'border-primary-dark bg-green-50'
                                     : 'border-transparent bg-gray-50 text-gray-500'
                                     }`}
                             >
-                                <div className={`w-8 h-6 border-2 rounded-sm mb-1 ${orientation === 'landscape' ? 'border-[#023430]' : 'border-gray-300'}`} />
-                                <span className={`text-xs font-bold ${orientation === 'landscape' ? 'text-[#023430]' : 'text-gray-600'}`}>Landscape</span>
+                                <div className={`w-8 h-6 border-2 rounded-sm mb-1 ${orientation === 'landscape' ? 'border-primary-dark' : 'border-gray-300'}`} />
+                                <span className={`text-xs font-bold ${orientation === 'landscape' ? 'text-primary-dark' : 'text-gray-600'}`}>Landscape</span>
                             </button>
                         </div>
                     </div>
@@ -416,7 +416,7 @@ export default function PrintUpload() {
                                 />
                                 <button
                                     onClick={() => setCopies(prev => Math.min(100, prev + 1))}
-                                    className="w-10 h-10 flex items-center justify-center text-[#023430] hover:bg-gray-50 transition-colors"
+                                    className="w-10 h-10 flex items-center justify-center text-primary-dark hover:bg-gray-50 transition-colors"
                                 >
                                     <span className="text-lg font-bold">+</span>
                                 </button>
@@ -451,7 +451,7 @@ export default function PrintUpload() {
                     <button
                         onClick={handleDirectOrder}
                         disabled={uploading}
-                        className="flex-1 bg-[#023430] text-white py-3.5 rounded-xl font-bold text-sm hover:bg-[#034540] active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                        className="flex-1 bg-primary-dark text-white py-3.5 rounded-xl font-bold text-sm hover:bg-[#034540] active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                         {uploading ? (
                             <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />{uploadProgress}%</>
@@ -463,7 +463,7 @@ export default function PrintUpload() {
                     <button
                         onClick={handleAddToCart}
                         disabled={uploading}
-                        className="flex-1 border-2 border-[#023430] text-[#023430] py-3.5 rounded-xl font-bold text-sm hover:bg-[#023430]/5 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                        className="flex-1 border-2 border-primary-dark text-primary-dark py-3.5 rounded-xl font-bold text-sm hover:bg-primary-dark/5 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                         <ShoppingCart size={16} /> Add to Cart
                     </button>

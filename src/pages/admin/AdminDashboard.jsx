@@ -258,7 +258,7 @@ export default function AdminDashboard({ onLogout }) {
             <div className="min-h-screen flex items-center justify-center bg-[#F5F5F5] px-4">
                 <div className="bg-white p-8 rounded-3xl shadow-xl max-w-xs w-full text-center">
                     <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Lock size={32} className="text-[#023430]" />
+                        <Lock size={32} className="text-primary-dark" />
                     </div>
                     <h2 className="text-xl font-bold text-gray-900 mb-2">Admin Locked</h2>
                     <p className="text-sm text-gray-500 mb-6">Enter PIN to access dashboard</p>
@@ -278,13 +278,13 @@ export default function AdminDashboard({ onLogout }) {
                             type="password"
                             value={pinInput}
                             onChange={e => setPinInput(e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 text-center text-2xl font-bold tracking-[0.5em] mb-4 focus:border-[#023430] focus:outline-none"
+                            className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 text-center text-2xl font-bold tracking-[0.5em] mb-4 focus:border-primary-dark focus:outline-none"
                             placeholder="••••"
                             maxLength={4}
                             inputMode="numeric"
                             autoFocus
                         />
-                        <button className="w-full bg-[#023430] text-white py-3.5 rounded-xl font-bold active:scale-95 transition-transform">
+                        <button className="w-full bg-primary-dark text-white py-3.5 rounded-xl font-bold active:scale-95 transition-transform">
                             Unlock
                         </button>
                     </form>
@@ -296,7 +296,7 @@ export default function AdminDashboard({ onLogout }) {
     return (
         <div className="min-h-screen bg-[#F5F5F5] flex overflow-x-hidden">
             {/* ─── Desktop Sidebar ─── */}
-            <aside className="hidden lg:flex flex-col w-64 bg-[#023430] text-white fixed h-full z-50 shadow-xl pt-[env(safe-area-inset-top)]">
+            <aside className="hidden lg:flex flex-col w-64 bg-primary-dark text-white fixed h-full z-50 shadow-xl pt-[env(safe-area-inset-top)]">
                 {/* Logo Area */}
                 <div className="p-6 border-b border-white/10">
                     <h1 className="text-xl font-black tracking-tight">MRN MULLA</h1>
@@ -315,7 +315,7 @@ export default function AdminDashboard({ onLogout }) {
                                 className={`
                                     w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all
                                     ${isActive
-                                        ? 'bg-white text-[#023430] shadow-lg'
+                                        ? 'bg-white text-primary-dark shadow-lg'
                                         : 'text-white/70 hover:bg-white/10 hover:text-white'
                                     }
                                 `}
@@ -357,7 +357,7 @@ export default function AdminDashboard({ onLogout }) {
                 <div className="lg:hidden fixed inset-0 z-50 flex" onClick={() => setSidebarOpen(false)}>
                     <div className="absolute inset-0 bg-black/50" />
                     <aside
-                        className="relative w-72 bg-[#023430] text-white h-full flex flex-col shadow-xl animate-slideRight pt-[env(safe-area-inset-top)]"
+                        className="relative w-72 bg-primary-dark text-white h-full flex flex-col shadow-xl animate-slideRight pt-[env(safe-area-inset-top)]"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="p-6 border-b border-white/10 flex items-center justify-between">
@@ -381,7 +381,7 @@ export default function AdminDashboard({ onLogout }) {
                                         className={`
                                             w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all
                                             ${isActive
-                                                ? 'bg-white text-[#023430] shadow-lg'
+                                                ? 'bg-white text-primary-dark shadow-lg'
                                                 : 'text-white/70 hover:bg-white/10 hover:text-white'}
                                         `}
                                     >
@@ -458,7 +458,7 @@ export default function AdminDashboard({ onLogout }) {
                         </button>
 
                         <div>
-                            <h1 className="text-lg font-extrabold text-[#023430] tracking-tight">
+                            <h1 className="text-lg font-extrabold text-primary-dark tracking-tight">
                                 <span className="lg:hidden">MRN MULLA</span>
                                 <span className="hidden lg:inline">
                                     {TABS.find(t => t.id === activeTab)?.label || 'Dashboard'}
@@ -525,7 +525,7 @@ export default function AdminDashboard({ onLogout }) {
                                     flex-1 py-3 text-[10px] font-black uppercase tracking-widest transition-all
                                     flex flex-col items-center gap-1
                                     ${activeTab === tab.id
-                                        ? 'border-b-3 border-[#023430] text-[#023430] bg-green-50/50'
+                                        ? 'border-b-3 border-primary-dark text-primary-dark bg-green-50/50'
                                         : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
                                     }
                                 `}

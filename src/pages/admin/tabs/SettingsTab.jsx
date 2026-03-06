@@ -94,7 +94,7 @@ export default function SettingsTab() {
                                 type="number"
                                 value={settings.delivery_charge}
                                 onChange={(e) => handleChange('delivery_charge', e.target.value)}
-                                className="w-full pl-9 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#023430] focus:border-transparent transition-all outline-none font-semibold"
+                                className="w-full pl-9 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all outline-none font-semibold"
                                 placeholder="0"
                             />
                         </div>
@@ -113,7 +113,7 @@ export default function SettingsTab() {
                                 type="number"
                                 value={settings.delivery_min_amount}
                                 onChange={(e) => handleChange('delivery_min_amount', e.target.value)}
-                                className="w-full pl-9 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#023430] focus:border-transparent transition-all outline-none font-semibold"
+                                className="w-full pl-9 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all outline-none font-semibold"
                                 placeholder="0"
                             />
                         </div>
@@ -145,7 +145,7 @@ export default function SettingsTab() {
                             type="number"
                             value={settings.latest_app_version}
                             onChange={(e) => handleChange('latest_app_version', e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#023430] focus:border-transparent transition-all outline-none font-semibold"
+                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all outline-none font-semibold"
                             placeholder="1"
                         />
                         <p className="text-xs text-red-500 mt-1">
@@ -178,7 +178,7 @@ export default function SettingsTab() {
                                 type="number"
                                 value={settings.bw_price}
                                 onChange={(e) => handleChange('bw_price', e.target.value)}
-                                className="w-full pl-9 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#023430] focus:border-transparent transition-all outline-none font-semibold"
+                                className="w-full pl-9 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all outline-none font-semibold"
                                 placeholder="3"
                             />
                         </div>
@@ -194,7 +194,7 @@ export default function SettingsTab() {
                                 type="number"
                                 value={settings.color_price}
                                 onChange={(e) => handleChange('color_price', e.target.value)}
-                                className="w-full pl-9 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#023430] focus:border-transparent transition-all outline-none font-semibold"
+                                className="w-full pl-9 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all outline-none font-semibold"
                                 placeholder="10"
                             />
                         </div>
@@ -207,7 +207,7 @@ export default function SettingsTab() {
                 onClick={handleSave}
                 disabled={loading || !hasChanges}
                 className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold transition-all ${hasChanges
-                    ? 'bg-[#023430] text-white hover:bg-[#034540] active:scale-95'
+                    ? 'bg-primary-dark text-white hover:bg-[#034540] active:scale-95'
                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     } disabled:opacity-50`}
             >

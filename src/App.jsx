@@ -7,6 +7,7 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import { PushNotifications } from '@capacitor/push-notifications'
 import { Capacitor } from '@capacitor/core'
 import { supabase } from './lib/supabase'
+import OfflineBanner from './components/OfflineBanner'
 
 // App Mode: 'customer' or 'admin'
 const APP_MODE = import.meta.env.VITE_APP_MODE || 'customer'
@@ -23,7 +24,7 @@ const PrintUpload = lazy(() => import('./pages/PrintUpload'))
 
 function LoadingScreen() {
     return (
-        <div className="min-h-screen bg-[#023430] flex items-center justify-center">
+        <div className="min-h-screen bg-primary-dark flex items-center justify-center">
             <div className="text-center">
                 <div className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4" />
                 <p className="text-white/70 text-sm font-medium">Loading...</p>
@@ -164,9 +165,10 @@ function App() {
 
     return (
         <CartProvider>
+            <OfflineBanner />
             {/* Mandatory Update Screen */}
             {updateRequired && (
-                <div className="fixed inset-0 z-[9999] bg-[#023430] flex flex-col justify-center items-center p-6 text-center animate-fadeIn">
+                <div className="fixed inset-0 z-9999 bg-primary-dark flex flex-col justify-center items-center p-6 text-center animate-fadeIn">
                     <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl flex flex-col items-center">
                         <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-6">
                             <span className="text-4xl">🚀</span>
@@ -187,7 +189,7 @@ function App() {
                                 }
                             }}
                             href="#"
-                            className="w-full bg-[#023430] text-white py-4 rounded-xl font-bold text-lg hover:scale-105 active:scale-95 transition-all shadow-lg flex justify-center items-center gap-2"
+                            className="w-full bg-primary-dark text-white py-4 rounded-xl font-bold text-lg hover:scale-105 active:scale-95 transition-all shadow-lg flex justify-center items-center gap-2"
                         >
                             Download Update Now
                         </a>

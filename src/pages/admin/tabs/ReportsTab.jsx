@@ -83,15 +83,15 @@ export default function ReportsTab() {
                 {trend && (
                     <span className={`
             text-[10px] font-bold flex items-center gap-0.5
-            ${trend > 0 ? 'text-[#00C853]' : 'text-[#F44336]'}
+            ${trend > 0 ? 'text-[#00C853]' : 'text-status-cancelled'}
           `}>
                         {trend > 0 ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
                         {Math.abs(trend)}%
                     </span>
                 )}
             </div>
-            <p className="text-2xl font-extrabold text-[#1A1A1A]">{prefix}{value.toLocaleString()}{suffix}</p>
-            <p className="text-[10px] font-semibold text-[#757575] uppercase tracking-wider mt-0.5">{label}</p>
+            <p className="text-2xl font-extrabold text-text-primary">{prefix}{value.toLocaleString()}{suffix}</p>
+            <p className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider mt-0.5">{label}</p>
         </div>
     )
 
@@ -104,7 +104,7 @@ export default function ReportsTab() {
                     <select
                         value={timeRange}
                         onChange={(e) => setTimeRange(e.target.value)}
-                        className="w-full appearance-none bg-white border border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm font-semibold text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#023430]/20 focus:border-[#023430]"
+                        className="w-full appearance-none bg-white border border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm font-semibold text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-dark/20 focus:border-primary-dark"
                     >
                         <option value="today">📅  Today</option>
                         <option value="week">📆  This Week</option>
@@ -128,8 +128,8 @@ export default function ReportsTab() {
                             className={`
                                 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-colors
                                 ${timeRange === range.id
-                                    ? 'bg-[#023430] text-white shadow-md'
-                                    : 'bg-white border border-[#E0E0E0] text-[#757575]'
+                                    ? 'bg-primary-dark text-white shadow-md'
+                                    : 'bg-white border border-border text-text-secondary'
                                 }
                             `}
                         >
@@ -140,7 +140,7 @@ export default function ReportsTab() {
             </div>
 
             {/* Revenue Hero */}
-            <div className="bg-gradient-to-br from-[#023430] to-[#046759] text-white rounded-2xl p-5 shadow-lg">
+            <div className="bg-linear-to-br from-primary-dark to-primary-medium text-white rounded-2xl p-5 shadow-lg">
                 <p className="text-xs font-semibold text-white/60 uppercase tracking-wider">Total Revenue</p>
                 <p className="text-4xl font-extrabold mt-1">₹{metrics.totalRevenue.toLocaleString()}</p>
                 <div className="flex items-center gap-4 mt-3">
@@ -149,7 +149,7 @@ export default function ReportsTab() {
                         <span className="text-xs text-white/70">{metrics.deliveredOrders} delivered</span>
                     </div>
                     <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 rounded-full bg-[#F44336]" />
+                        <div className="w-2 h-2 rounded-full bg-status-cancelled" />
                         <span className="text-xs text-white/70">{metrics.cancelledOrders} cancelled</span>
                     </div>
                 </div>
@@ -165,30 +165,30 @@ export default function ReportsTab() {
 
             {/* Payment Split */}
             <div className="bg-white rounded-xl p-4 shadow-sm">
-                <h3 className="text-xs font-bold text-[#757575] uppercase tracking-wider mb-3">
+                <h3 className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-3">
                     Payment Methods
                 </h3>
                 <div className="space-y-3">
                     <div>
                         <div className="flex justify-between text-sm mb-1">
-                            <span className="text-[#1A1A1A] font-medium">Cash on Delivery</span>
-                            <span className="font-bold text-[#023430]">{metrics.codOrders}</span>
+                            <span className="text-text-primary font-medium">Cash on Delivery</span>
+                            <span className="font-bold text-primary-dark">{metrics.codOrders}</span>
                         </div>
                         <div className="w-full h-2 bg-[#F5F5F5] rounded-full overflow-hidden">
                             <div
-                                className="h-full bg-[#FFC107] rounded-full transition-all duration-500"
+                                className="h-full bg-status-pending rounded-full transition-all duration-500"
                                 style={{ width: `${metrics.deliveredOrders > 0 ? (metrics.codOrders / metrics.deliveredOrders) * 100 : 0}%` }}
                             />
                         </div>
                     </div>
                     <div>
                         <div className="flex justify-between text-sm mb-1">
-                            <span className="text-[#1A1A1A] font-medium">Prepaid / Online</span>
-                            <span className="font-bold text-[#023430]">{metrics.prepaidOrders}</span>
+                            <span className="text-text-primary font-medium">Prepaid / Online</span>
+                            <span className="font-bold text-primary-dark">{metrics.prepaidOrders}</span>
                         </div>
                         <div className="w-full h-2 bg-[#F5F5F5] rounded-full overflow-hidden">
                             <div
-                                className="h-full bg-[#2196F3] rounded-full transition-all duration-500"
+                                className="h-full bg-status-out rounded-full transition-all duration-500"
                                 style={{ width: `${metrics.deliveredOrders > 0 ? (metrics.prepaidOrders / metrics.deliveredOrders) * 100 : 0}%` }}
                             />
                         </div>
@@ -198,7 +198,7 @@ export default function ReportsTab() {
 
             {/* Recent Orders Timeline */}
             <div className="bg-white rounded-xl p-4 shadow-sm">
-                <h3 className="text-xs font-bold text-[#757575] uppercase tracking-wider mb-3">
+                <h3 className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-3">
                     Recent Activity
                 </h3>
                 <div className="space-y-3">
@@ -207,16 +207,16 @@ export default function ReportsTab() {
                             <div className={`
                 w-8 h-8 rounded-full flex items-center justify-center
                 ${order.status === 'Delivered' ? 'bg-[#E8F5E9] text-[#00C853]' :
-                                    order.status === 'Cancelled' ? 'bg-[#FFEBEE] text-[#F44336]' :
-                                        'bg-[#FFF8E1] text-[#FFC107]'}
+                                    order.status === 'Cancelled' ? 'bg-[#FFEBEE] text-status-cancelled' :
+                                        'bg-[#FFF8E1] text-status-pending'}
               `}>
                                 <ShoppingBag size={14} />
                             </div>
                             <div className="flex-1">
-                                <p className="text-sm font-medium text-[#1A1A1A]">
+                                <p className="text-sm font-medium text-text-primary">
                                     {order.customer_json?.name || 'Customer'} — ₹{order.total_amount}
                                 </p>
-                                <p className="text-[10px] text-[#757575]">
+                                <p className="text-[10px] text-text-secondary">
                                     {order.status} • {new Date(order.created_at).toLocaleString('en-IN', {
                                         day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
                                     })}
@@ -226,7 +226,7 @@ export default function ReportsTab() {
                     ))}
 
                     {filteredOrders.length === 0 && (
-                        <p className="text-center text-sm text-[#757575] py-4">No orders in this period</p>
+                        <p className="text-center text-sm text-text-secondary py-4">No orders in this period</p>
                     )}
                 </div>
             </div>

@@ -530,14 +530,25 @@ export default function Checkout() {
         }
 
         try {
-            // 1. Call Backend Edge Function to create a secure Razorpay order
-            const secureCartPayload = items.map(item => ({
+            // 1. Call Backend Edge Function to create a secure Razorpay order.
+            // IMPORTANT: Filter out print items — they have string IDs like "print-..."
+            // which fail the Postgres bigint check in the edge function.
+            // Their price is passed separately via the totalOverride so the amount is still correct.
+            const regularCartItems = items.filter(i => i.type !== 'print')
+            const printItemsTotal = items
+                .filter(i => i.type === 'print')
+                .reduce((sum, i) => sum + (i.price * i.qty), 0)
+
+            const secureCartPayload = regularCartItems.map(item => ({
                 id: item.id,
                 quantity: item.qty
             }))
 
             const { data: orderData, error: orderError } = await supabase.functions.invoke('create-razorpay-order', {
-                body: { cart: secureCartPayload, deliveryFee: appliedDeliveryCharge }
+                body: {
+                    cart: secureCartPayload,
+                    deliveryFee: appliedDeliveryCharge + printItemsTotal
+                }
             })
 
             if (orderError || !orderData?.success) {
@@ -664,7 +675,7 @@ export default function Checkout() {
     // Order Success Screen
     if (orderPlaced) {
         return (
-            <div className="min-h-screen bg-[#023430] flex items-center justify-center p-6">
+            <div className="min-h-screen bg-primary-dark flex items-center justify-center p-6">
                 <div className="text-center animate-scaleIn">
                     <div className="w-24 h-24 rounded-full bg-[#00C853] text-white flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(0,200,83,0.3)]">
                         <CheckCircle size={48} />
@@ -673,7 +684,7 @@ export default function Checkout() {
                     <p className="text-white/70 text-base mb-2">Your order has been received</p>
                     <p className="text-white/50 text-sm mb-8 font-mono">Order ID: #{orderId}</p>
                     <div className="space-y-3 max-w-xs mx-auto">
-                        <button onClick={() => navigate(`/track/${orderId}`)} className="w-full py-3.5 rounded-xl bg-white text-[#023430] font-bold text-base active:scale-95 transition-transform shadow-lg">
+                        <button onClick={() => navigate(`/track/${orderId}`)} className="w-full py-3.5 rounded-xl bg-white text-primary-dark font-bold text-base active:scale-95 transition-transform shadow-lg">
                             Track Order
                         </button>
                         <button onClick={() => navigate('/')} className="w-full py-3.5 rounded-xl bg-white/10 text-white font-semibold text-base active:scale-95 transition-transform border border-white/20">
@@ -693,15 +704,15 @@ export default function Checkout() {
         return (
             <div className="min-h-screen bg-[#F5F5F5] flex flex-col">
                 <header className="bg-white px-4 py-4 flex items-center gap-3 shadow-sm">
-                    <button onClick={() => navigate('/')}><ChevronLeft size={24} className="text-[#1A1A1A]" /></button>
-                    <h1 className="text-xl font-bold text-[#1A1A1A]">Checkout</h1>
+                    <button onClick={() => navigate('/')}><ChevronLeft size={24} className="text-text-primary" /></button>
+                    <h1 className="text-xl font-bold text-text-primary">Checkout</h1>
                 </header>
                 <div className="flex-1 flex items-center justify-center p-6">
                     <div className="text-center">
                         <div className="text-6xl mb-4">🛒</div>
-                        <h2 className="text-xl font-bold text-[#1A1A1A] mb-2">Your cart is empty</h2>
-                        <p className="text-sm text-[#757575] mb-6">Add some products to get started</p>
-                        <button onClick={() => navigate('/')} className="px-6 py-3 rounded-xl bg-[#023430] text-white font-semibold active:scale-95 transition-transform">
+                        <h2 className="text-xl font-bold text-text-primary mb-2">Your cart is empty</h2>
+                        <p className="text-sm text-text-secondary mb-6">Add some products to get started</p>
+                        <button onClick={() => navigate('/')} className="px-6 py-3 rounded-xl bg-primary-dark text-white font-semibold active:scale-95 transition-transform">
                             Browse Products
                         </button>
                     </div>
@@ -714,9 +725,9 @@ export default function Checkout() {
         <div className="min-h-screen bg-[#F5F5F5] pb-6">
             <header className="bg-white px-4 pb-4 pt-[calc(env(safe-area-inset-top)+1rem)] flex items-center gap-3 sticky top-0 z-10 shadow-sm">
                 <button onClick={() => navigate('/')} className="active:scale-90 transition-transform">
-                    <ChevronLeft size={24} className="text-[#1A1A1A]" />
+                    <ChevronLeft size={24} className="text-text-primary" />
                 </button>
-                <h1 className="text-xl font-bold text-[#1A1A1A]">Checkout</h1>
+                <h1 className="text-xl font-bold text-text-primary">Checkout</h1>
             </header>
 
             <div className="max-w-lg mx-auto">
@@ -724,8 +735,8 @@ export default function Checkout() {
                 <section className="bg-white p-5 mb-2 mt-2 mx-3 rounded-2xl shadow-sm">
                     <div className="flex items-center justify-between mb-5">
                         <div className="flex items-center gap-2">
-                            <MapPin className="text-[#023430]" size={18} />
-                            <h2 className="text-xs font-bold text-[#757575] uppercase tracking-widest">Delivery Address</h2>
+                            <MapPin className="text-primary-dark" size={18} />
+                            <h2 className="text-xs font-bold text-text-secondary uppercase tracking-widest">Delivery Address</h2>
                         </div>
                         {savedCustomer && (
                             <button onClick={clearSavedCustomer} className="text-xs text-red-500 font-semibold hover:text-red-600">
@@ -738,7 +749,7 @@ export default function Checkout() {
                         <div className="bg-gray-50 rounded-xl p-3">
                             {editingContact ? (
                                 <div className="space-y-3">
-                                    <p className="text-xs font-bold text-[#023430] mb-2">Edit Contact Details</p>
+                                    <p className="text-xs font-bold text-primary-dark mb-2">Edit Contact Details</p>
                                     <input
                                         type="text"
                                         placeholder="Your Name"
@@ -767,7 +778,7 @@ export default function Checkout() {
                                                 }))
                                                 setEditingContact(false)
                                             }}
-                                            className="flex-1 py-2 rounded-lg bg-[#023430] text-white text-sm font-bold"
+                                            className="flex-1 py-2 rounded-lg bg-primary-dark text-white text-sm font-bold"
                                         >
                                             Save
                                         </button>
@@ -787,7 +798,7 @@ export default function Checkout() {
                                     </div>
                                     <button
                                         onClick={() => { setEditName(name); setEditPhone(phone); setEditingContact(true) }}
-                                        className="text-xs text-[#023430] font-bold px-3 py-1.5 rounded-lg bg-white border border-gray-200"
+                                        className="text-xs text-primary-dark font-bold px-3 py-1.5 rounded-lg bg-white border border-gray-200"
                                     >
                                         Change Contact
                                     </button>
@@ -804,12 +815,12 @@ export default function Checkout() {
                                     <div
                                         key={addr.id || index}
                                         onClick={() => handleSelectSavedAddress(index)}
-                                        className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${selectedAddressIndex === index ? 'border-[#023430] bg-[#023430]/5' : 'border-gray-100 bg-white hover:border-gray-300'}`}
+                                        className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${selectedAddressIndex === index ? 'border-primary-dark bg-primary-dark/5' : 'border-gray-100 bg-white hover:border-gray-300'}`}
                                     >
                                         <div className="flex justify-between items-start">
                                             <div className="flex gap-3">
-                                                <div className={`mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${selectedAddressIndex === index ? 'border-[#023430]' : 'border-gray-300'}`}>
-                                                    {selectedAddressIndex === index && <div className="w-2 h-2 rounded-full bg-[#023430]" />}
+                                                <div className={`mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${selectedAddressIndex === index ? 'border-primary-dark' : 'border-gray-300'}`}>
+                                                    {selectedAddressIndex === index && <div className="w-2 h-2 rounded-full bg-primary-dark" />}
                                                 </div>
                                                 <div>
                                                     <p className="text-sm font-bold text-gray-900 mb-0.5">{addr.houseNo}</p>
@@ -822,20 +833,20 @@ export default function Checkout() {
 
                                 <div
                                     onClick={handleSelectNewAddressMode}
-                                    className={`p-3 rounded-xl border-2 border-dashed cursor-pointer transition-all flex items-center gap-3 ${isAddingNewAddress ? 'border-[#023430] bg-[#023430]/5' : 'border-gray-300 bg-gray-50 hover:bg-gray-100'}`}
+                                    className={`p-3 rounded-xl border-2 border-dashed cursor-pointer transition-all flex items-center gap-3 ${isAddingNewAddress ? 'border-primary-dark bg-primary-dark/5' : 'border-gray-300 bg-gray-50 hover:bg-gray-100'}`}
                                 >
-                                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${isAddingNewAddress ? 'border-[#023430]' : 'border-gray-300'}`}>
-                                        {isAddingNewAddress && <div className="w-2 h-2 rounded-full bg-[#023430]" />}
+                                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${isAddingNewAddress ? 'border-primary-dark' : 'border-gray-300'}`}>
+                                        {isAddingNewAddress && <div className="w-2 h-2 rounded-full bg-primary-dark" />}
                                     </div>
-                                    <span className={`text-sm font-bold ${isAddingNewAddress ? 'text-[#023430]' : 'text-gray-600'}`}>+ Add New Address</span>
+                                    <span className={`text-sm font-bold ${isAddingNewAddress ? 'text-primary-dark' : 'text-gray-600'}`}>+ Add New Address</span>
                                 </div>
                             </div>
                         )}
 
                         {/* Delivery Address Form (Always show so user can edit their currently selected address) */}
                         {true && (
-                            <div className="mt-4 p-4 rounded-xl border border-[#023430]/20 bg-emerald-50/50 animate-fadeIn">
-                                <h3 className="text-xs font-bold text-[#023430] mb-3 uppercase tracking-wider">Delivery Details (Editable)</h3>
+                            <div className="mt-4 p-4 rounded-xl border border-primary-dark/20 bg-emerald-50/50 animate-fadeIn">
+                                <h3 className="text-xs font-bold text-primary-dark mb-3 uppercase tracking-wider">Delivery Details (Editable)</h3>
                                 <div className="grid grid-cols-2 gap-3 mb-4">
                                     <div>
                                         <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block">House No.</label>
@@ -907,8 +918,8 @@ export default function Checkout() {
                 {/* Cart Items */}
                 <section className="bg-white p-5 mb-2 mx-3 rounded-2xl shadow-sm">
                     <div className="flex items-center gap-2 mb-4">
-                        <ShoppingBag className="text-[#023430]" size={18} />
-                        <h2 className="text-xs font-bold text-[#757575] uppercase tracking-widest">Your Items</h2>
+                        <ShoppingBag className="text-primary-dark" size={18} />
+                        <h2 className="text-xs font-bold text-text-secondary uppercase tracking-widest">Your Items</h2>
                         <span className="ml-auto text-xs text-gray-400 font-medium">{items.length} items</span>
                     </div>
                     <div className="space-y-3">
@@ -939,7 +950,7 @@ export default function Checkout() {
                                         <span className="w-6 text-center text-xs font-bold text-gray-900">{item.qty}</span>
                                         <button
                                             onClick={() => incrementQty(item.id)}
-                                            className="w-7 h-7 flex items-center justify-center text-[#023430]"
+                                            className="w-7 h-7 flex items-center justify-center text-primary-dark"
                                         >
                                             <Plus size={13} />
                                         </button>
@@ -968,7 +979,7 @@ export default function Checkout() {
                             )}
                             <div className="flex justify-between font-bold text-lg pt-2 border-t border-gray-100">
                                 <span>Total</span>
-                                <span className="text-[#023430]">₹{totalAmount}</span>
+                                <span className="text-primary-dark">₹{totalAmount}</span>
                             </div>
                         </div>
                     </div>
@@ -1021,14 +1032,14 @@ export default function Checkout() {
 
                 {/* Payment Method Selection */}
                 <section className="mx-3 space-y-3 mb-6">
-                    <h2 className="text-xs font-bold text-[#757575] uppercase tracking-widest px-2">Payment Method</h2>
+                    <h2 className="text-xs font-bold text-text-secondary uppercase tracking-widest px-2">Payment Method</h2>
 
                     {/* Pay Online */}
                     {RAZORPAY_KEY_ID && (
                         <button
                             onClick={() => setPaymentMethod('online')}
                             className={`w-full flex items-center gap-4 py-4 px-5 rounded-2xl font-bold text-base transition-all duration-200 ${paymentMethod === 'online'
-                                ? 'bg-[#023430] text-white shadow-lg shadow-[#023430]/20 ring-2 ring-[#023430]'
+                                ? 'bg-primary-dark text-white shadow-lg shadow-primary-dark/20 ring-2 ring-primary-dark'
                                 : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-gray-400'
                                 }`}
                         >
@@ -1041,7 +1052,7 @@ export default function Checkout() {
                             </div>
                             <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'online' ? 'border-white bg-white' : 'border-gray-300'
                                 }`}>
-                                {paymentMethod === 'online' && <div className="w-2.5 h-2.5 rounded-full bg-[#023430]" />}
+                                {paymentMethod === 'online' && <div className="w-2.5 h-2.5 rounded-full bg-primary-dark" />}
                             </div>
                         </button>
                     )}
@@ -1073,7 +1084,7 @@ export default function Checkout() {
                     <button
                         onClick={placeOrder}
                         disabled={!isFormValid() || isSubmitting}
-                        className="w-full bg-[#023430] text-white py-4 rounded-2xl font-bold text-lg disabled:bg-gray-300 disabled:cursor-not-allowed active:scale-[0.98] transition-transform shadow-xl shadow-[#023430]/20 flex items-center justify-center gap-2"
+                        className="w-full bg-primary-dark text-white py-4 rounded-2xl font-bold text-lg disabled:bg-gray-300 disabled:cursor-not-allowed active:scale-[0.98] transition-transform shadow-xl shadow-primary-dark/20 flex items-center justify-center gap-2"
                     >
                         {isSubmitting ? (
                             <>
